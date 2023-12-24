@@ -969,7 +969,8 @@ void lowerZ() {
   // Lower tool
 
   int sensorVal = analogRead(POT_THICK);
-  matThickness = mapF(sensorVal, 0, 1024, 0, maxThickness);
+  // matThickness = mapF(sensorVal, 0, 1024, 0, maxThickness);
+  matThickness = 0.0;       // for now, we'll ignore the potentiometer
 
   stepperZ.moveTo(-Conv*matThickness);
   while (abs(stepperZ.distanceToGo()) > (Conv*1)) {
