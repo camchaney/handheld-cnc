@@ -31,6 +31,7 @@ float desPosIntersect(float xc, float yc, float th, float x3, float y3, float x4
 float desiredPosition(float dX,float dY,float theta);
 float mapF(long x, float in_min, float in_max, float out_min, float out_max);
 // Sensing functions
+bool isDiffOk(float val1, float val2, float threshold);
 void doSensing();
 // Motor control functions
 void enableStepperZ();
@@ -120,6 +121,7 @@ const float lx = 120.0f;                // x length of rectangular sensor config
 const float ly = 140.0f;                // y length of rectangular sensor configuration
 const float xOff[3] = {-lx/2,lx/2,-lx/2};
 const float yOff[3] = {ly/2,ly/2,-ly/2};
+const float maxDiffThreshold = 10.0;    // max ang. vel. diff. for sensor readings (rad/s)
 
 // Motor properties
 // Note: Constants are in units (steps/*) whereas variables are (mm/*). Kind of
@@ -680,6 +682,13 @@ float mapF(long x, float in_min, float in_max, float out_min, float out_max) {
 }
 
 // Sensing functions
+bool isDiffOk(float val1, float val2, float threshold) {
+  // Checks the reliability of sensor readings
+  float diff = fabs(val1 - val2);
+  Serial.printf("Ang. Vel. difference = %f\n", diff);
+  return diff <= threshold;
+}
+
 void doSensing() {
   //Serial.println(micros() - timeLastPoll);
   timeLastPoll = micros();
@@ -711,12 +720,28 @@ void doSensing() {
     estAngVel[1] = (measVelX[2] - measVelX[1])/ly;
     estAngVel[2] = (measVelY[1] - measVelY[0])/lx;
     estAngVel[3] = (measVelY[1] - measVelY[2])/lx;
-    // Simple average of angular velocities
+    // Iterate through pairs of angular velocity measurements
     float sumAngVel = 0.0f;
-    for (int i = 0; i<4; i++) {
-      sumAngVel = sumAngVel + estAngVel[i];
+    int angVelCount = 0;
+    for (int i = 0; i < 3; i++) {         // Outer loop goes up to the second-to-last element
+      for (int j = i + 1; j < 4; j++) {   // Inner loop starts from the element after i
+        if (isDiffOk(estAngVel[i], estAngVel[j], maxDiffThreshold)) {
+          sumAngVel += estAngVel[i] + estAngVel[j];
+          angVelCount += 2;     // Counting both valid measurements
+          break;
+        }
+      }
     }
-    estAngVel1 = sumAngVel / 4.0f;
+    if (angVelCount == 0) {
+      // Handle error: No good sensor data
+    }
+    estAngVel1 = (angVelCount > 0) ? sumAngVel / angVelCount : 0.0f;
+    // // Simple average of angular velocities
+    // float sumAngVel = 0.0f;
+    // for (int i = 0; i<4; i++) {
+    //   sumAngVel = sumAngVel + estAngVel[i];
+    // }
+    // estAngVel1 = sumAngVel / 4.0f;
     // Integrate angular velocity to get angle
     estYaw = estYaw + estAngVel1*dt;
 
