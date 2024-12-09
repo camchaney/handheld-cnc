@@ -42,7 +42,7 @@ def get_line_info(p1, p2):
 	else:
 		# alpha = np.rad2deg(np.arctan(m))
 		# beta = 90 - alpha
-		beta = np.rad2deg(np.arctan(1/m))           # angle from y-axis
+		beta = -np.rad2deg(np.arctan(1/m))           # angle from y-axis (negative to match direction convention of router)
 
 	return [beta, dist]
 
@@ -100,17 +100,6 @@ def convert_angles_to_radians(angles_deg):
 
 def plot_kmeans(plot_df, cluster_centers):
 	plt.figure(figsize=(8, 8))
-
-	# NOT NEEDED - modulo already applied earlier on
-	# For each cluster with negative y center, apply modulo 180
-	# for cluster_label in range(len(cluster_centers)):
-	# 	if cluster_centers[cluster_label, 1] < 0:
-	# 		mask = plot_df['cluster_label'] == cluster_label
-	# 		# Apply modulo 180 to the angles
-	# 		plot_df.loc[mask, 'angle_d'] = plot_df.loc[mask, 'angle_d'] % 180
-	# 		# Recalculate x and y coordinates
-	# 		plot_df.loc[mask, 'x'] = np.cos(convert_angles_to_radians(plot_df.loc[mask, 'angle_d']))
-	# 		plot_df.loc[mask, 'y'] = np.sin(convert_angles_to_radians(plot_df.loc[mask, 'angle_d']))
 	
 	# Plot points colored by cluster using adjusted coordinates
 	color_map = plt.get_cmap('tab10')
@@ -119,14 +108,7 @@ def plot_kmeans(plot_df, cluster_centers):
 											alpha=0.03, 
 											s=100)
 	
-	# Plot adjusted cluster centers
-	adjusted_centers = cluster_centers.copy()
-	for i in range(len(cluster_centers)):
-		if cluster_centers[i, 1] < 0:
-			angle = np.degrees(np.arctan2(cluster_centers[i, 1], cluster_centers[i, 0])) % 180
-			adjusted_centers[i] = [np.cos(np.radians(angle)), np.sin(np.radians(angle))]
-	
-	plt.scatter(adjusted_centers[:, 0], adjusted_centers[:, 1], 
+	plt.scatter(cluster_centers[:, 0], cluster_centers[:, 1], 
 							c='red', marker='x', s=200, linewidths=3, 
 							label='Cluster Centers')
 	
@@ -168,8 +150,8 @@ def rotate_df(df, angle_degrees):
 	
 	# Rotate each pair of points
 	for i, row in df.iterrows():
-		p0_rotated = rotate_point(row.p0, angle_degrees)
-		p1_rotated = rotate_point(row.p1, angle_degrees)
+		p0_rotated = rotate_point(row.p0, -angle_degrees)
+		p1_rotated = rotate_point(row.p1, -angle_degrees)
 		
 		rotated_df.loc[i] = {
 			'p0': p0_rotated,
@@ -198,8 +180,8 @@ def group_segments(segments_df):
 		kmeans_df['cluster_label'] = kmeans.labels_
 
 		cluster_centers = kmeans.cluster_centers_
-		cluster_center_angles = np.degrees(np.arctan2(cluster_centers[:, 1], cluster_centers[:, 0]))
-		cluster_center_angles = cluster_center_angles % 180
+		cluster_center_angles = np.degrees(np.arctan2(cluster_centers[:, 0], cluster_centers[:, 1]))
+		# cluster_center_angles = cluster_center_angles % 180
 		kmeans_df['cluster_angle'] = kmeans_df['cluster_label'].map(
 			dict(enumerate(cluster_center_angles)))
 
@@ -294,8 +276,8 @@ class ArrowHandler(HandlerPatch):
 		
 		# Calculate arrow start and end points
 		arrow_length = width * 0.7
-		dx = arrow_length * np.cos(angle_rad)
-		dy = arrow_length * np.sin(angle_rad)
+		dx = - arrow_length * np.sin(angle_rad)
+		dy = arrow_length * np.cos(angle_rad)
 		
 		# Center the arrow
 		center_x = width/2 - xdescent
@@ -338,7 +320,7 @@ def plot_segment_by_group(grouped_dfs):
 
 	plt.xlabel("X-axis")
 	plt.ylabel("Y-axis")
-	plt.title("Plot of Segments by Angle")
+	plt.title("Plot of Segments by Angle (wrt. Y-axis")
 	plt.grid(True)
 	
 	# Create legend with custom handler
