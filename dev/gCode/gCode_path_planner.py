@@ -98,6 +98,86 @@ def process_raw_gcode(gcode_df):
 def convert_angles_to_radians(angles_deg):
 	return np.radians(angles_deg)
 
+def plot_kmeans(plot_df, cluster_centers):
+	plt.figure(figsize=(8, 8))
+
+	# NOT NEEDED - modulo already applied earlier on
+	# For each cluster with negative y center, apply modulo 180
+	# for cluster_label in range(len(cluster_centers)):
+	# 	if cluster_centers[cluster_label, 1] < 0:
+	# 		mask = plot_df['cluster_label'] == cluster_label
+	# 		# Apply modulo 180 to the angles
+	# 		plot_df.loc[mask, 'angle_d'] = plot_df.loc[mask, 'angle_d'] % 180
+	# 		# Recalculate x and y coordinates
+	# 		plot_df.loc[mask, 'x'] = np.cos(convert_angles_to_radians(plot_df.loc[mask, 'angle_d']))
+	# 		plot_df.loc[mask, 'y'] = np.sin(convert_angles_to_radians(plot_df.loc[mask, 'angle_d']))
+	
+	# Plot points colored by cluster using adjusted coordinates
+	color_map = plt.get_cmap('tab10')
+	scatter = plt.scatter(plot_df['x'], plot_df['y'], 
+											c=color_map(plot_df['cluster_label']), 
+											alpha=0.03, 
+											s=100)
+	
+	# Plot adjusted cluster centers
+	adjusted_centers = cluster_centers.copy()
+	for i in range(len(cluster_centers)):
+		if cluster_centers[i, 1] < 0:
+			angle = np.degrees(np.arctan2(cluster_centers[i, 1], cluster_centers[i, 0])) % 180
+			adjusted_centers[i] = [np.cos(np.radians(angle)), np.sin(np.radians(angle))]
+	
+	plt.scatter(adjusted_centers[:, 0], adjusted_centers[:, 1], 
+							c='red', marker='x', s=200, linewidths=3, 
+							label='Cluster Centers')
+	
+	# Add circle for reference
+	circle = plt.Circle((0, 0), 1, fill=False, linestyle='--', color='gray')
+	plt.gca().add_artist(circle)
+	
+	# Equal aspect ratio to maintain circular appearance
+	plt.axis('equal')
+	plt.grid(True)
+	plt.xlabel('cos(angle)')
+	plt.ylabel('sin(angle)')
+	plt.title(f'K-means Clustering Results (k={len(cluster_centers)})')
+	plt.legend()
+	
+	# Add colorbar
+	# plt.colorbar(scatter, label='Cluster Label')
+	
+	plt.show()
+
+def rotate_point(point, angle_degrees):
+	# Convert angle to radians
+	angle_rad = np.radians(angle_degrees)
+	
+	# Create rotation matrix
+	rotation_matrix = np.array([
+		[np.cos(angle_rad), -np.sin(angle_rad), 0],
+		[np.sin(angle_rad), np.cos(angle_rad), 	0],
+		[0,									0,									1]
+	])
+	
+	# Rotate the point
+	rotated_point = np.dot(rotation_matrix, point)
+	return rotated_point
+
+def rotate_df(df, angle_degrees):
+	# Create new DataFrame for rotated points
+	rotated_df = pd.DataFrame(columns=['p0', 'p1'])
+	
+	# Rotate each pair of points
+	for i, row in df.iterrows():
+		p0_rotated = rotate_point(row.p0, angle_degrees)
+		p1_rotated = rotate_point(row.p1, angle_degrees)
+		
+		rotated_df.loc[i] = {
+			'p0': p0_rotated,
+			'p1': p1_rotated
+		}
+
+	return rotated_df
+
 def group_segments(segments_df):
 	# angle_range = 90     # this range is 2x the range of one side of y-axis
 
@@ -109,18 +189,23 @@ def group_segments(segments_df):
 
 	while (not buckets_valid):
 		kmeans_df = segments_df
-		kmeans_df['x'] = np.cos(convert_angles_to_radians(kmeans_df.angle_d))
-		kmeans_df['y'] = np.sin(convert_angles_to_radians(kmeans_df.angle_d))
+		# We want to plot the angles of every line in our design on the unit circle.
+		# Note: remember that the angles were calculated w.r.t. the y-axis, so the x and y coordinates should be calculated as such
+		kmeans_df['x'] = np.sin(convert_angles_to_radians(kmeans_df.angle_d))
+		kmeans_df['y'] = np.cos(convert_angles_to_radians(kmeans_df.angle_d))
 
 		kmeans = KMeans(n_clusters=k, random_state=0).fit(kmeans_df[['x', 'y']])
 		kmeans_df['cluster_label'] = kmeans.labels_
 
 		cluster_centers = kmeans.cluster_centers_
-		cluster_centers_deg = np.degrees(np.arctan2(cluster_centers[:, 1], cluster_centers[:, 0])) % 180
+		cluster_center_angles = np.degrees(np.arctan2(cluster_centers[:, 1], cluster_centers[:, 0]))
+		cluster_center_angles = cluster_center_angles % 180
 		kmeans_df['cluster_angle'] = kmeans_df['cluster_label'].map(
-			dict(enumerate(cluster_centers_deg)))
+			dict(enumerate(cluster_center_angles)))
 
 		buckets_valid = 1
+
+		group_dfs = {}
 
 		for cluster_label in np.unique(kmeans_df['cluster_label']):
 			# Extract the angles in degrees for the current cluster
@@ -133,28 +218,46 @@ def group_segments(segments_df):
 			# Handle wraparound at 360 degrees by considering both directions
 			angular_range = min((max_angle - min_angle), (min_angle + 360 - max_angle))
 
+			# Reorganize dataframe into dict (one dict containing dataframes for each cluster)
+			cluster_df = pd.DataFrame({
+				'p0': kmeans_df[kmeans_df['cluster_label'] == cluster_label]['p0'],
+				'p1': kmeans_df[kmeans_df['cluster_label'] == cluster_label]['p1'],
+				'angle_d': kmeans_df[kmeans_df['cluster_label'] == cluster_label]['angle_d'],
+			})
+			group_dfs[cluster_label] = {
+				'df': cluster_df,
+				'cluster_angle': kmeans_df[kmeans_df['cluster_label'] == cluster_label]['cluster_angle'].iloc[0]
+			}
+
 			# Check if the angular range exceeds the boundary
 			if angular_range > angle_thresh:
 				k = k + 1
 				buckets_valid = 0
 				break
 
-	# Reorganize dataframe
-	group_dfs = {}
+	plot_kmeans(kmeans_df.copy(), cluster_centers)
 
-	for cluster_label in np.unique(kmeans_df['cluster_label']):
-		# Create a DataFrame for each cluster
-		cluster_df = pd.DataFrame({
-			'p0': kmeans_df[kmeans_df['cluster_label'] == cluster_label]['p0'],
-			'p1': kmeans_df[kmeans_df['cluster_label'] == cluster_label]['p1'],
-			'angle_d': kmeans_df[kmeans_df['cluster_label'] == cluster_label]['angle_d'],
-		})
+	# Sort clustered dataframes
+	plt.figure(figsize=(10, 6))
+	cmap = plt.get_cmap('tab10')
 
-		# Append the DataFrame to our list
-		group_dfs[cluster_label] = {
-			'df': cluster_df,
-			'cluster_angle': kmeans_df[kmeans_df['cluster_label'] == cluster_label]['cluster_angle'].iloc[0]
-    }
+	for idx, (cluster_label, group_data) in enumerate(group_dfs.items()):
+		c = cmap(idx)
+		df = group_data['df']
+		cluster_angle = group_data['cluster_angle']
+
+		# Rotate cluster by its cluster angle
+		rotated_df = rotate_df(df.copy(), cluster_angle)
+		for i, segment in rotated_df.iterrows():
+			x = [segment.p0[0], segment.p1[0]]
+			y = [segment.p0[1], segment.p1[1]]
+			plt.plot(x, y, color=c, linestyle='--', label=f'Rotated Cluster {cluster_label}' if i == 0 else "")
+
+	plt.grid(True)
+	plt.axis('equal')
+	plt.legend()
+	plt.title('Original vs Rotated Clusters')
+	plt.show()
 
 	return group_dfs
 
