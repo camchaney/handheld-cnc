@@ -257,16 +257,16 @@ def plot_segment_by_group(segments_df):
 	handler_map = {}
 	
 	for idx, cluster_label in enumerate(unique_clusters):
-		cluster_segments_df = segments_df[segments_df['cluster_label'] == cluster_label]
+		clustered_segments_df = segments_df[segments_df['cluster_label'] == cluster_label]
 		c = cmap(idx)
 
-		for i, segment in cluster_segments_df.iterrows():
+		for i, segment in clustered_segments_df.iterrows():
 			x = [segment.p0[0], segment.p1[0]]
 			y = [segment.p0[1], segment.p1[1]]
 			line = plt.plot(x, y, color=c)[0]
 
-			if i == cluster_segments_df.index[0]:
-				handles.append(line)
+			if i == clustered_segments_df.index[0]:
+				handles.append(line)				# TODO: what's happening here?
 				angle = segment.cluster_angle
 				labels.append(f'Cluster {cluster_label} at {angle:.1f}°')
 				# Create handler for this cluster
