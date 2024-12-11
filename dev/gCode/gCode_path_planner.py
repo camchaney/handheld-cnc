@@ -10,19 +10,6 @@ from sklearn.cluster import KMeans
 angle_thresh = 90								# (deg)
 compass_gantry_length = 106			# (mm)
 
-# PARSE INPUTS
-# TODO: make this actually parce gcode + nc files...
-def read_gcode_csv(file_path):
-	df = pd.read_csv(file_path)
-	new_row = pd.DataFrame([[0, 0, 0]], columns=df.columns)     # add home point to start
-	df = pd.concat([new_row, df], ignore_index=True)
-	return df
-
-def read_gcode(file_path):
-	# dataframe with columns: x, y, z
-
-	return
-
 # CLASSES
 class ArrowHandler(HandlerPatch):
 	"""Custom handler to draw arrows in legend"""
@@ -137,6 +124,19 @@ class Cluster:
 	def rotate_passes(self, angle_degrees):
 		for pass_obj in self.passes:
 			pass_obj.rotate(angle_degrees)
+
+# PARSE INPUTS
+# TODO: make this actually parce gcode + nc files...
+def read_gcode_csv(file_path):
+	df = pd.read_csv(file_path)
+	new_row = pd.DataFrame([[0, 0, 0]], columns=df.columns)     # add home point to start
+	df = pd.concat([new_row, df], ignore_index=True)
+	return df
+
+def read_gcode(file_path):
+	# dataframe with columns: x, y, z
+
+	return
 
 # MATH FUNCTIONS
 # geo function
