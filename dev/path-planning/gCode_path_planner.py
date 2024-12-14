@@ -598,7 +598,7 @@ def group_segments(segments_df):
 
 def main():
 	# my_df = read_gcode_csv("dev/gCode/basePlate_test.csv")
-	my_df = read_gcode_csv("dev/gCode/cal.csv")
+	my_df = read_gcode_csv("dev/path-planning/gcode/cal.csv")
 	# my_df = read_gcode("dev/gCode/basePlate_test.nc")
 	plt.scatter(my_df.x, my_df.y)
 	plt.grid()
