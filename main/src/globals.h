@@ -6,6 +6,7 @@
 #include <TMCStepper.h>
 #include <PMW3360.h>
 #include <SdFat.h>
+#include <USBHost_t36.h>
 #include <Arduino_GFX_Library.h>
 #include <EncoderButton.h>
 #include "config.h"
@@ -22,6 +23,9 @@ extern PMW3360 sensors[4];
 extern EncoderButton encoder;
 extern Arduino_GFX *screen;
 extern SdFat sd;
+extern USBHost usbHost;
+extern USBDrive usbDrive;
+extern USBFilesystem firstPartition;
 
 // State variables
 extern State state;
@@ -37,6 +41,7 @@ extern Path path;
 extern int current_point_idx;
 
 // SD stuff
+extern FsVolume* currentVolume;
 extern FsFile logFile;
 extern FsFile root;
 extern FsFile currentDir;

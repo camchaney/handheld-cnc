@@ -71,7 +71,7 @@ void handleFileSelection() {
 				// Handle going up one directory
 				currentDir.close();
 				currentPath = getParentPath(currentPath.c_str());
-				currentDir = sd.open(getParentPath(currentDirName));
+				currentDir = currentVolume->open(getParentPath(currentDirName));
 			} else {
 				// Handle entering a subdirectory
 				currentDir.close();
@@ -80,7 +80,7 @@ void handleFileSelection() {
 				} else {
 					currentPath += "/" + selectedFile;
 				}
-				currentDir = sd.open(currentPath);
+				currentDir = currentVolume->open(currentPath);
 			}
 			
 			current_file_idx = 0;
@@ -152,7 +152,7 @@ void parseGCodeFile(const String& sFilename) {
 	const char* filePath = fullPath.c_str();
 
 	FsFile file;
-	if (!file.open(filePath, O_READ)) {
+	if (!file.open(currentVolume, filePath, O_READ)) {
 		Serial.printf("Failed to open file: %s\n", filePath);
 		return;
 	}
@@ -435,7 +435,9 @@ bool initializeLogFile() {
 		sprintf(filename, "logFiles/LOG%03d.bin", fileNumber++);
 	} while (sd.exists(filename) && fileNumber < 1000);
 	
-	logFile = sd.open(filename, FILE_WRITE);
+	logFile.open(&sd, filename, oflag_t(O_CREAT | O_WRITE | O_TRUNC));
+
+	//logFile = sd.open(filename, FILE_WRITE);
 	if (!logFile) {
 		Serial.println("Could not create log file!");
 		return false;

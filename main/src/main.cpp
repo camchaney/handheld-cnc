@@ -48,7 +48,30 @@ void setup() {
 		outputSDOn = false;
 	} else {
 		Serial.println("Initialization done.");
+		currentVolume = &sd;
 	}
+
+    Serial.print("Initializing USB storage...");
+    usbHost.begin();
+    delay(100); // Give time for device to enumerate
+    if (usbDrive.begin()) {
+        Serial.println("USB storage initialized.");
+		int usbTries = 0;
+		const int maxUsbTries = 10;
+		while (!firstPartition && usbTries < maxUsbTries) {
+			usbHost.Task();
+			Serial.println("Waiting for USB partition...");
+			delay(100);
+			usbTries++;
+		}
+		if (firstPartition) {
+			currentVolume = &firstPartition.mscfs;
+		} else {
+			Serial.println("No USB partition found.");
+		}
+    } else {
+        Serial.println("No USB storage found.");
+    }
 
 	drawCenteredText("Zero Machine XY", 2);
 	encoder.setClickHandler(onClickZeroMachineXY);

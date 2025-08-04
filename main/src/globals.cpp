@@ -12,6 +12,9 @@ EncoderButton encoder(ENCODER_PIN_A, ENCODER_PIN_B, ENCODER_BUTT);
 Arduino_DataBus *bus = new Arduino_HWSPI(TFT_DC, TFT_CS, &SPI1);
 Arduino_GFX *screen = new Arduino_GC9A01(bus, TFT_RST, 0, true);
 SdFat sd;
+USBHost usbHost;
+USBDrive usbDrive(usbHost);
+USBFilesystem firstPartition(usbDrive);
 
 // State variables
 State state = POWER_ON;
@@ -22,10 +25,12 @@ DesignType designType = PRESET;
 bool plungeReady = false;
 
 // Path data
-Path path;
+DMAMEM Point points[MAX_POINTS];
+Path path = { points, MAX_POINTS, 0.0f };
 int current_point_idx = 0;
 
 // SD Stuff
+FsVolume* currentVolume = nullptr;
 FsFile logFile;
 FsFile root;
 FsFile currentDir;
