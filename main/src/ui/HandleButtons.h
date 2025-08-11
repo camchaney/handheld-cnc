@@ -20,7 +20,7 @@ class HandleButtons {
     void setLeftClickHandler(CallbackFunction f);
     void setRightClickHandler(CallbackFunction f);
     void setButtonsHoldHandler(CallbackFunction f);
-    bool isPressed();
+    bool arePressed();
     bool enabled();
 
     /**

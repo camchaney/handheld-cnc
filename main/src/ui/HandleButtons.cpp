@@ -55,8 +55,8 @@ void HandleButtons::setButtonsHoldHandler(CallbackFunction f) {
   buttons_hold_cb = f;
 }
 
-bool HandleButtons::isPressed() {
-  return (!_leftDebouncer.read() || !_rightDebouncer.read());
+bool HandleButtons::arePressed() {
+  return (!_leftDebouncer.read() && !_rightDebouncer.read());
 }
 
 bool HandleButtons::enabled() {
