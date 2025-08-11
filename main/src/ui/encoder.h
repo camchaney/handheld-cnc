@@ -19,6 +19,7 @@ void onClickResetState(EncoderButton &eb);
 void onClickZeroMachineXY(EncoderButton &eb);
 void onClickZeroWorkspaceZ(EncoderButton &eb);
 void onClickZeroWorkspaceXY(EncoderButton &eb);
+void onHoldAutoTouch(HandleButtons &btn);
 
 // Thickness handlers
 void onEncoderUpdateThickness(EncoderButton &eb);

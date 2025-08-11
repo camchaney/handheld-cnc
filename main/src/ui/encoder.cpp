@@ -26,11 +26,19 @@ void onClickZeroMachineXY(EncoderButton &eb) {
 	drawCenteredText("Zeroing Machine XY...", 2);
 	machineZeroXY();
 	state = MACHINE_XY_ZERO;
-	drawCenteredText("Zero Workspace Z", 2);
+	drawCenteredText("Zero Workspace Z\nHold L+R for\nauto touch", 2);
 	encoder.setClickHandler(onClickZeroWorkspaceZ);
+	handleButtons.setButtonsHoldHandler(onHoldAutoTouch);
+	handleButtons.enable(true);
+}
+
+void onHoldAutoTouch(HandleButtons &btn) {
+	drawCenteredText("Auto touch...", 2);
+	drawCenteredText("Zero Workspace Z", 2);
 }
 
 void onClickZeroWorkspaceZ(EncoderButton &eb) {
+	handleButtons.enable(false);
 	drawCenteredText("Zeroing Workspace Z...", 2);
 	workspaceZeroZ();
 	state = WORKSPACE_Z_ZERO;

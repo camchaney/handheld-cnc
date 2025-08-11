@@ -67,6 +67,7 @@ void loop() {
 	stepperL.run();
 	stepperZ.run();
 	encoder.update();
+	handleButtons.update();
 
 	// Serial handling
 	handleSerial();
