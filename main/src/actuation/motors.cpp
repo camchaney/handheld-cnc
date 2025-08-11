@@ -226,6 +226,70 @@ void workspaceZeroZ() {
 	stepperZ.setAcceleration(maxAccelZ);
 }
 
+void autoTouchWorkspaceZ() {
+	enableStepperZ();
+
+	stepperZ.setSpeed(zeroSpeed_0 * ConvLead);
+	while (digitalRead(LIMIT_MACH_Z0) == HIGH) {
+		stepperZ.runSpeed();
+	}
+
+	stepperZ.move(-retract * ConvLead);
+	while (stepperZ.distanceToGo() != 0) {
+		stepperZ.run();
+	}
+
+	stepperZ.setSpeed(zeroSpeed_1 * ConvLead);
+	while (digitalRead(LIMIT_MACH_Z0) == HIGH) {
+		stepperZ.runSpeed();
+	}
+
+	stepperZ.move(-retract * ConvLead);
+	while (stepperZ.distanceToGo() != 0) {
+		stepperZ.run();
+	}
+
+	//stepperZ.setMaxSpeed(zeroSpeed_0 * ConvLead * 16);
+	//stepperZ.setSpeed(zeroSpeed_0 * ConvLead * 16);
+	//driverZ.rms_current(maxCurrent_RMS);
+	uint8_t prev_sgthrs = driverZ.SGTHRS();
+	//driverZ.en_spreadCycle(true);
+	//driverZ.SGTHRS(100);
+	//driverZ.TCOOLTHRS(0xFFFFF);
+	//driverZ.semin(5);
+  	//driverZ.semax(2);
+  	//driverZ.sedn(0b01);
+	//driverZ.microsteps(16);
+
+	long maxSteps = zRange * ConvLead;
+	bool stallDetected = false;
+	stepperZ.move(-maxSteps);
+	while (stepperZ.distanceToGo() != 0 && !stallDetected && (digitalRead(BUTT_HANDLE_L) == LOW) && (digitalRead(BUTT_HANDLE_R) == LOW)) {
+		stepperZ.run();
+		// StallGuard-Check (ggf. Schwellenwert anpassen)
+		uint16_t sg = driverZ.SG_RESULT();
+		if (sg < 10) {
+			//stallDetected = true;
+			Serial.printf("Touched! %d\n", sg);
+		}
+	}
+	
+	disableStepperZ();
+
+	// restore defaults
+	driverZ.rms_current(maxCurrent_RMS);
+	driverZ.SGTHRS(prev_sgthrs);
+	driverZ.semin(0);
+  	driverZ.semax(0);
+  	driverZ.sedn(0);
+	driverZ.TCOOLTHRS(0);
+	driverZ.en_spreadCycle(false);
+	driverZ.microsteps(uSteps);
+
+	stepperZ.setMaxSpeed(maxSpeedZ);
+	stepperZ.setAcceleration(maxAccelZ);
+}
+
 void workspaceZeroXY() {
 	Position desPos;
 	desPos.set(0.0f, 0.0f, 0.0f);

@@ -34,6 +34,7 @@ void onClickZeroMachineXY(EncoderButton &eb) {
 
 void onHoldAutoTouch(HandleButtons &btn) {
 	drawCenteredText("Auto touch...", 2);
+	autoTouchWorkspaceZ();
 	drawCenteredText("Zero Workspace Z", 2);
 }
 
