@@ -51,6 +51,8 @@ void setup() {
 		currentVolume = &sd;
 	}
 
+
+	#if FEATURE_USB == 1
     Serial.print("Initializing USB storage...");
     usbHost.begin();
     delay(100); // Give time for device to enumerate
@@ -72,6 +74,7 @@ void setup() {
     } else {
         Serial.println("No USB storage found.");
     }
+	#endif
 
 	drawCenteredText("Zero Machine XY", 2);
 	encoder.setClickHandler(onClickZeroMachineXY);

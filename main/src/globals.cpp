@@ -12,9 +12,11 @@ EncoderButton encoder(ENCODER_PIN_A, ENCODER_PIN_B, ENCODER_BUTT);
 Arduino_DataBus *bus = new Arduino_HWSPI(TFT_DC, TFT_CS, &SPI1);
 Arduino_GFX *screen = new Arduino_GC9A01(bus, TFT_RST, 0, true);
 SdFat sd;
+#if FEATURE_USB == 1
 USBHost usbHost;
 USBDrive usbDrive(usbHost);
 USBFilesystem firstPartition(usbDrive);
+#endif
 
 // State variables
 State state = POWER_ON;

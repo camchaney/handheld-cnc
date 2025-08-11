@@ -6,11 +6,13 @@
 #include <TMCStepper.h>
 #include <PMW3360.h>
 #include <SdFat.h>
-#include <USBHost_t36.h>
 #include <Arduino_GFX_Library.h>
 #include <EncoderButton.h>
 #include "config.h"
 #include "types.h"
+#if FEATURE_USB == 1
+#include <USBHost_t36.h>
+#endif
 
 // Global object declarations
 extern AccelStepper stepperR;
@@ -23,9 +25,11 @@ extern PMW3360 sensors[4];
 extern EncoderButton encoder;
 extern Arduino_GFX *screen;
 extern SdFat sd;
+#if FEATURE_USB == 1
 extern USBHost usbHost;
 extern USBDrive usbDrive;
 extern USBFilesystem firstPartition;
+#endif
 
 // State variables
 extern State state;
