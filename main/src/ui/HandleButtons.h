@@ -17,6 +17,7 @@ class HandleButtons {
   public:
     HandleButtons(byte leftHandlePin, byte rightHandlePin);
     void update();
+    void clearHandlers();
     void setLeftClickHandler(CallbackFunction f);
     void setRightClickHandler(CallbackFunction f);
     void setButtonsHoldHandler(CallbackFunction f);

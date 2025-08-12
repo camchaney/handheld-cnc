@@ -43,6 +43,12 @@ void HandleButtons::update() {
   }
 }
 
+void HandleButtons::clearHandlers() {
+  left_click_cb = nullptr;
+  right_click_cb = nullptr;
+  buttons_hold_cb = nullptr;
+}
+
 void HandleButtons::setLeftClickHandler(CallbackFunction f) {
   left_click_cb = f;
 }
