@@ -293,7 +293,7 @@ void autoTouchWorkspaceZ() {
 	Timer1.detachInterrupt();
 	delay(1); // Allow time for the last step to complete
 	Serial.println("Compensate backslash...");
-	stepperZ.move(1.4f * ConvLead);
+	stepperZ.move(autoTouchRetraction* ConvLead);
 	while (stepperZ.distanceToGo() != 0) {
 		stepperZ.run();
 	}
