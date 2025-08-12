@@ -1,5 +1,5 @@
 #include "motors.h"
-#include <TimerOne.h> // Or use the appropriate timer library for your platform
+#include <TimerOne.h>
 
 float maxHeight = 0.0f;
 volatile long zStepCount = 0;
