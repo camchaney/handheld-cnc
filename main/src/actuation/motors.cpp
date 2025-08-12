@@ -1,6 +1,10 @@
 #include "motors.h"
+#include <TimerOne.h> // Or use the appropriate timer library for your platform
 
 float maxHeight = 0.0f;
+volatile long zStepCount = 0;
+volatile long zStepTarget = 0;
+volatile bool zStepActive = false;
 
 void motorSetup() {
 	// Set up motors
@@ -249,31 +253,59 @@ void autoTouchWorkspaceZ() {
 		stepperZ.run();
 	}
 
+	stepperZ.setSpeed(zeroSpeed_0 * ConvLead);
 	//stepperZ.setMaxSpeed(zeroSpeed_0 * ConvLead * 16);
 	//stepperZ.setSpeed(zeroSpeed_0 * ConvLead * 16);
-	//driverZ.rms_current(maxCurrent_RMS);
+	driverZ.rms_current(300);
 	uint8_t prev_sgthrs = driverZ.SGTHRS();
-	//driverZ.en_spreadCycle(true);
-	//driverZ.SGTHRS(100);
-	//driverZ.TCOOLTHRS(0xFFFFF);
-	//driverZ.semin(5);
-  	//driverZ.semax(2);
-  	//driverZ.sedn(0b01);
-	//driverZ.microsteps(16);
+	driverZ.en_spreadCycle(true);
+	driverZ.SGTHRS(60);
+	driverZ.TCOOLTHRS(0xFFFFF);
+	driverZ.TPWMTHRS(0);
 
 	long maxSteps = zRange * ConvLead;
 	bool stallDetected = false;
-	stepperZ.move(-maxSteps);
-	while (stepperZ.distanceToGo() != 0 && !stallDetected && (digitalRead(BUTT_HANDLE_L) == LOW) && (digitalRead(BUTT_HANDLE_R) == LOW)) {
-		stepperZ.run();
-		// StallGuard-Check (ggf. Schwellenwert anpassen)
-		uint16_t sg = driverZ.SG_RESULT();
-		if (sg < 10) {
-			//stallDetected = true;
-			Serial.printf("Touched! %d\n", sg);
+
+	// Setup interrupt-based stepping
+	zStepCount = 0;
+	zStepTarget = maxSteps;
+	zStepActive = true;
+	digitalWrite(MOT_DIR_Z, HIGH);
+
+	// Configure timer for step interval (1ms - stepPulseWidth)
+	Timer1.initialize(500); // 500us = 0.5ms interval
+	Timer1.attachInterrupt(zStepISR);
+
+	 uint32_t last_time=0;
+
+	while (zStepActive) {
+		uint32_t ms = millis();
+		if((ms-last_time) > 100) { //run every 0.1s
+			last_time = ms;
+
+			Serial.print("0 ");
+			Serial.print(driverZ.SG_RESULT(), DEC);
+			Serial.print(" ");
+			Serial.println(driverZ.cs2rms(driverZ.cs_actual()), DEC);
 		}
+
+		// StallGuard-Check (ggf. Schwellenwert anpassen)
+		uint16_t sg = 0;
+		if (sg < 10) {
+			//Serial.printf("Touched! %d\n", sg);
+			//stallDetected = true;
+			//zStepActive = false;
+			//break;
+		}
+		if ((digitalRead(BUTT_HANDLE_L) != LOW) || (digitalRead(BUTT_HANDLE_R) != LOW)) {
+			zStepActive = false;
+			break;
+		}
+		delay(1); // Allow time for ISR and checks
 	}
-	
+
+	Timer1.detachInterrupt();
+
 	disableStepperZ();
 
 	// restore defaults
@@ -329,4 +361,19 @@ void motorToCartesian(float &x, float &y, float &z) {
 	x = (a + b) / 2;
 	y = (a - b) / 2;
 	z = stepperZ.currentPosition() * 1.0f / ConvLead;
+}
+
+void zStepISR() {
+	if (!zStepActive) return;
+	if (zStepCount >= zStepTarget) {
+		zStepActive = false;
+		digitalWrite(MOT_STEP_Z, LOW);
+		Timer1.detachInterrupt();
+		return;
+	}
+	// Generate one step pulse
+	digitalWrite(MOT_STEP_Z, HIGH);
+	delayMicroseconds(stepPulseWidth);
+	digitalWrite(MOT_STEP_Z, LOW);
+	zStepCount++;
 }

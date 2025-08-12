@@ -20,5 +20,6 @@ void autoTouchWorkspaceZ();
 void workspaceZeroXY();
 void cartesianToMotor(Position pos);
 void motorToCartesian(float &x, float &y, float &z);
+void zStepISR();
 
 #endif
