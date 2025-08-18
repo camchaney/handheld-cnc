@@ -8,6 +8,7 @@ TrajectoryGenerator trajectory;
 ActuationController actuator(desPos);
 
 bool checkEndstops() {
+	//TODO: check stepper looks strange
 	if (digitalRead(LIMIT_MACH_X0) == LOW) {
 		stopStepperX();
 		stepperZ.moveTo(ConvLead*restHeight);
@@ -15,7 +16,7 @@ bool checkEndstops() {
 			stepperZ.run();
 		}
 		Serial.println("X limit reached");
-		encoderDesignType();
+		ui.showCompass(false);
 		return false;
 	}
 
@@ -23,7 +24,7 @@ bool checkEndstops() {
 		stopStepperZ();
 		stopStepperX();
 		Serial.println("Z limit reached");
-		encoderDesignType();
+		ui.showCompass(false);
 		return false;
 	}
 
@@ -107,7 +108,7 @@ void handleCutting(long deltaTime) {
 	}
 
 	// Update UI
-	updateUI(desPos, (float)current_point_idx/(float)path.numPoints);
+	ui.updateCompass(desPos, (float)current_point_idx/(float)path.numPoints);
 
 	// Path logging
 	// TODO: make this more clean (without pass by reference)

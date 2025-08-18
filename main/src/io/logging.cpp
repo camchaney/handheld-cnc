@@ -575,7 +575,7 @@ void logPath() {
 
 		if (designType == PRESET) {
 			char designName[MAX_STRING_LENGTH];
-			sprintf(designName, "preset_%i", designPreset);
+			sprintf(designName, "preset_%c", selectedDesignPreset);
 			writeFileHeader(designName, path.numPoints);
 		} else {
 			writeFileHeader(filename, path.numPoints);

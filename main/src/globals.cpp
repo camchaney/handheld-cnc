@@ -10,8 +10,9 @@ TMC2209Stepper driverZ(&SERIAL_PORT, R_SENSE, DRIVER_ADDRESS_Z);
 PMW3360 sensors[4];
 EncoderButton encoder(ENCODER_PIN_A, ENCODER_PIN_B, ENCODER_BUTT);
 Arduino_DataBus *bus = new Arduino_HWSPI(TFT_DC, TFT_CS, &SPI1);
-Arduino_GFX *screen = new Arduino_GC9A01(bus, TFT_RST, 0, true);
+Arduino_GFX *screen = new Arduino_GC9A01(bus, TFT_RST, 2, true);
 SdFat sd;
+CompassUI ui(screen);
 
 // State variables
 State state = POWER_ON;
@@ -24,6 +25,7 @@ bool plungeReady = false;
 // Path data
 Path path;
 int current_point_idx = 0;
+char selectedDesignPreset = ' ';
 
 // SD Stuff
 FsFile logFile;
@@ -56,11 +58,21 @@ bool outputSerialOn = false;				// output data to serial
 bool outputSDOn = true;				// output data to SD card
 int designOrCalibrate = 0;			// choose design or calibrate (0 or 1)
 int acceptCal = 0;					// accept calibration or not
-int designPreset = 0;				// choose the design
 int pauseSelection = 0;					// pause menu selection
+bool autoZeroXY = true;
 
 // Material properties
 float matThickness = 0.0;
+
+// Preset parameters
+float radius = 30.0;
+float length = 30.0f;
+float width = 30.0f;
+float deepth = 0.0f;
+float xOffset = 0.0f;
+float yOffset = 0.0f;
+float rotation = 0.0f;
+float tilt = 90.0f;
 
 // Timing variables
 long unsigned totalLoopTime = 0;

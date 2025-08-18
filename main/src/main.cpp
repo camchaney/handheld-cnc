@@ -52,7 +52,6 @@ void setup() {
 
 	drawCenteredText("Zero Machine XY", 2);
 	encoder.setClickHandler(onClickZeroMachineXY);
-	encoder.setTripleClickHandler(onClickResetState);
 }
 
 void loop() {
@@ -67,6 +66,7 @@ void loop() {
 	stepperL.run();
 	stepperZ.run();
 	encoder.update();
+	ui.poll();
 
 	// Serial handling
 	handleSerial();

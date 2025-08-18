@@ -89,18 +89,18 @@ void doubleLineGenerator() {
 
 void circleGenerator() {
 	int num_points = 4000;
-	float r = 30.0;
-	Point center = Point{x: 0.0, y: r, z: -matThickness};
+	float r = radius;
+	Point center = Point{x: 0.0f + xOffset, y: r + yOffset, z: -deepth};
 
-	path.points[0] = Point{x: 0.0, y: 0.0, z: restHeight};
+	path.points[0] = Point{x: 0.0f + xOffset, y: 0.0f + yOffset, z: restHeight};
 
 	for (int i = 1; i < num_points; i++) {
 		float theta = (float)i/(num_points-1)*(2*PI);
-		float zVal = (i == num_points - 1 || i == 1) ? restHeight : -matThickness;
+		float zVal = (i == num_points - 1 || i == 1) ? restHeight : -deepth;
 		
 		path.points[i] = Point{
-			x: center.x + r*cosf(theta - PI/2),
-			y: center.y + r*sinf(theta - PI/2),
+			x: center.x + r*cosf(theta - PI/2) + xOffset,
+			y: center.y + r*sinf(theta - PI/2) + yOffset,
 			z: zVal,
 			feature: NORMAL
 		};
@@ -299,42 +299,42 @@ void drillSquareGenerator() {
 	path.numPoints = 6;
 }
 
-void makePresetPath() {
-	switch (designPreset) {
-		case 0:
+void makePresetPath(char c) {
+	switch (c) {
+		case '0':
 			lineGenerator();
 			Serial.println("Line path generated!");
 			break;
-		case 1:
+		case '1':
 			sinGenerator();
 			Serial.println("Sine wave path generated!");
 			break;
-		case 2:
+		case '2':
 			zigZagGenerator();
 			Serial.println("Zig-zag path generated!");
 			break;
-		case 3:
+		case '3':
 			doubleLineGenerator();
 			Serial.println("Double line path generated!");
 			break;
-		case 4:
+		case '4':
 			diamondGenerator();
 			Serial.println("Sine square path generated!");
 			break;
-		case 5:
+		case '5':
 			squareGeneratorSine();
 			Serial.println("Circle path generated!");
 			break;
-		case 6:
+		case '6':
 			squareGeneratorMake();
 			Serial.println("Wave square path generated!");
 			break;
 
-		case 7:
+		case '7':
 			circleGenerator();
 			Serial.println("Circle path generated!");
 			break;
-		case 8:
+		case '8':
 			drillSquareGenerator();
 			Serial.println("Square drill path generated!");
 			break;

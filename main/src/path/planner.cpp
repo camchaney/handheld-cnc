@@ -74,5 +74,5 @@ void TrajectoryGenerator::update(long deltaTime, Point& goal) {
 
 	state = ZEROED;
 	if (designType == SPEED_RUN) encoderEndScreen();
-	encoderDesignType();
+	ui.home();
 }

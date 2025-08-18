@@ -392,9 +392,7 @@ void calibrate() {
 		for (int i = 0; i < ns; i++) {
 			Serial.printf("Sensor %i:\tCx:%.4f, Cy:%.4f, Cr:%.4f\n", i, cal[i].x, cal[i].y, cal[i].r);
 		}
-
-		encoderDesignType();
-	} else {
-		encoderDesignOrCalibrate();
 	}
+
+	ui.home();
 }

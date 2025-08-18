@@ -12,7 +12,6 @@ const int centerLine = 3;
 
 float exponentialSkew(float x);
 void drawMenu(const char* options[], const int numOptions, int select);
-void drawShape();
 void listFiles();
 void updateFileList();
 void handleFileSelection();
