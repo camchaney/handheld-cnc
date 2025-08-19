@@ -522,7 +522,7 @@ void CompassUI::updateCompass(Position desPosition, float progress) {
     if (!_isShowCompass) return;
 
     if ((millis() - lastDraw) > 15) {
-        iter = (iter + 1)%4;
+        iter = (iter + 1) % 4;
 
         drawCompass(desPosition, progress, iter);
         lastDraw = millis();

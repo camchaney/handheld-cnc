@@ -10,6 +10,7 @@ void onStartDummy(void* ctx) {
 }
 
 void onCuttingMenuBack(void* ctx) {
+	handleButtons.enable(false);
 	ui.showCompass(true);
 }
 
@@ -23,14 +24,19 @@ void onClickCompassUI(EncoderButton &eb) {
 }
 
 void onDoubleClickCompassUI(EncoderButton &eb) {
-	if (ui.isConfirming())
-		ui.enter(); // strange bug, first click in the confirm is detected as double click
-	else
-		ui.back();
+	ui.back();
 }
 
 void onEncoderCompassUI(EncoderButton &eb) {
 	ui.adjust(eb.increment());
+}
+
+void onLeftClickCompassUI(HandleButtons &btn) {
+	ui.back();
+}
+
+void onRightClickCompassUI(HandleButtons &btn) {
+	ui.enter();
 }
 
 void onStartSelectFile(void* ctx) {
@@ -59,6 +65,7 @@ void onStartFileCut(void* ctx) {
 
 	state = READY;
 	cutState = NOT_CUT_READY;
+	handleButtons.enable(false);
 	ui.showCompass(true);
 	
 	// Clear out sensors in case we moved while in design mode
@@ -74,6 +81,7 @@ void onStartPresetCut(void* ctx) {
 	designType = PRESET;
 	state = DESIGN_SELECTED;
 	selectedDesignPreset = item->calledFrom->label[0];
+	handleButtons.enable(false);
 	ui.showCompass(true);
     makePresetPath(item->calledFrom->label[0]);
 
