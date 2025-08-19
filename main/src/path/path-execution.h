@@ -19,5 +19,6 @@ bool checkEndstops();
 // Path advancement and execution functions
 void handleChickenHead();
 void handleCutting(long deltaTime);
+void stopCutting();
 
 #endif

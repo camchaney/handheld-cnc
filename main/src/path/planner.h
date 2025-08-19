@@ -14,6 +14,7 @@ class TrajectoryGenerator {
 	
 		// Update desired position based on elapsed time
 		void update(long deltaTime, Point& goal);
+		void stop(Point& goal);
 	
 	private:
 		// std::vector<GCodePoint> path;

@@ -27,8 +27,9 @@ void CompassUI::enable(bool enable) {
 
 void CompassUI::poll() {
     if (!_isEnabled) return;
-    if (_isShowCompass) return;
+    executeCommand();
 
+    if (_isShowCompass) return;
     render(getCurrentRoot());
 }
 
@@ -64,6 +65,13 @@ void CompassUI::adjust(int increment) {
 }
 
 void CompassUI::enter() {
+    _processEnter = true;
+}
+
+void CompassUI::executeCommand() {
+    if (!_processEnter) return;
+    _processEnter = false;
+
     if (_isConfirming) {
         _isConfirming = false;
         Serial.print(F("Confirm selection: "));
@@ -114,7 +122,10 @@ bool CompassUI::confirm(const char* message, const char* yesText, const char* no
 
 	drawConfirmMenu();
 
-    while (isConfirming()) _confirmLoopCallback();
+    while (isConfirming()) {
+        _confirmLoopCallback();
+        executeCommand();
+    }
 
     return _confirmSelection == 0; // Yes selected
 }

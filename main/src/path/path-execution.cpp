@@ -95,6 +95,8 @@ void handleCutting(long deltaTime) {
 		stepperZ.moveTo(ConvLead*restHeight);
 	} else if (valid_sensors){
 		// All good to go!
+		if (!running) ui.showCompass(true);
+
 		running = true;
 		cutState = CUTTING;
 		
@@ -118,4 +120,9 @@ void handleCutting(long deltaTime) {
 
 	// Debugging
 	if (debuggingOn) debugging(goal, desPos);
+}
+
+void stopCutting() {
+	// Stop the trajectory generator
+	trajectory.stop(goal);
 }

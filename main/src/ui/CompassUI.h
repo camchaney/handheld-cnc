@@ -25,6 +25,7 @@ public:
     void back();
     void showCompass(bool show = true);
     void home();
+    void executeCommand();
     bool confirm(const char* message, const char* yesText = "Yes", const char* noText = "No");
     bool isConfirming() const { return _isConfirming; }
     MenuRoot& getCurrentRoot();
@@ -59,5 +60,6 @@ private:
     bool _isEnabled = false;
     bool _isShowCompass = false;
     bool _isConfirming = false;
+    bool _processEnter = false;
 };
 #endif

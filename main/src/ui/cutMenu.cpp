@@ -9,7 +9,7 @@ Menu stopCutMenu;
 
 MenuItem cutItems[] = {
     makeFloat("Feed Rate Boost", &feedrateBoost, 0.1, 5, 0.1, "x"),
-    makeSubmenu("Stop", &stopCutMenu),
+    makeAction("Stop", onStartStopCut, nullptr),
     makeSubmenu("Rezero X/Y", &stopCutMenu),
     makeAction("Back", onCuttingMenuBack, nullptr),
 };

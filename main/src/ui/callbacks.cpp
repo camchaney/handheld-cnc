@@ -1,6 +1,7 @@
 #include "globals.h"
 #include "callbacks.h"
 #include "../path/path-generators.h"
+#include "../path/path-execution.h"
 #include "../sensors/sensors.h"
 
 void onStartDummy(void* ctx) {
@@ -13,6 +14,7 @@ void onCuttingMenuBack(void* ctx) {
 }
 
 void onStartCalibrate(void* ctx) {
+	if (!ui.confirm("Start calibration?")) return;
 	calibrate();
 }
 
@@ -35,6 +37,12 @@ void onStartSelectFile(void* ctx) {
 	ui.enable(false);
 	designType = FROM_FILE;
 	encoderDesignSelect();
+}
+
+void onStartStopCut(void* ctx) {
+	if (!ui.confirm("Stop cutting?")) return;
+
+	stopCutting();
 }
 
 void onStartFileCut(void* ctx) {

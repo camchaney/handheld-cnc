@@ -7,6 +7,7 @@ void onCuttingMenuBack(void* ctx);
 void onStartPresetCut(void* ctx);
 void onStartSelectFile(void* ctx);
 void onStartFileCut(void* ctx);
+void onStartStopCut(void* ctx);
 void onStartCalibrate(void* ctx);
 void onStartDummy(void* ctx);
 
