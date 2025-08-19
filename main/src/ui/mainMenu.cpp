@@ -30,7 +30,6 @@ MenuItem squareItems[] = {
     makeFloat("X Offset", &xOffset, -10000, 10000, 0.1, "mm"),
     makeFloat("Y Offset", &yOffset, -10000, 10000, 0.1, "mm"),
     makeFloat("Rotation", &rotation, 0, 360, 0.1, "deg"),
-    makeFloat("Tilt", &tilt, 1, 179, 0.1, "deg"),
     makeBack(),
 };
 

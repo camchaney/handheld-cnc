@@ -211,11 +211,11 @@ void parseGCodeFile(const String& sFilename) {
 					else if (atof(ptr+1) == 80) newPoint.feature = NORMAL; 		// G80 cancels current command (used in drill cycle)
 					break;
 				case 'X':
-					newPoint.x = atof(ptr + 1);
+					newPoint.x = atof(ptr + 1) + xOffset;
 					hasNewCoordinate = true;
 					break;
 				case 'Y':
-					newPoint.y = atof(ptr + 1);
+					newPoint.y = atof(ptr + 1) + yOffset;
 					hasNewCoordinate = true;
 					break;
 				case 'Z':

@@ -82,7 +82,6 @@ extern float deepth;
 extern float xOffset;
 extern float yOffset;
 extern float rotation;
-extern float tilt;
 
 // Timing variables
 extern long unsigned totalLoopTime;

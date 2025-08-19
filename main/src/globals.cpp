@@ -72,7 +72,6 @@ float deepth = 0.0f;
 float xOffset = 0.0f;
 float yOffset = 0.0f;
 float rotation = 0.0f;
-float tilt = 90.0f;
 
 // Timing variables
 long unsigned totalLoopTime = 0;

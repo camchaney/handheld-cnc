@@ -3,22 +3,27 @@
 const float sinAmp = 5.0;
 const float sinPeriod = 50.0;
 const float pathMax_y = 100.0;
-// const float circleDiameter = 800.0;
 
 void lineGenerator() {
-	int num_points = 1000;
-	// Generate line path to cut
-	for (int i = 0; i < num_points; i++) {
-		path.points[i] = Point{
-			x: 0,
-			y: (pathMax_y) * (float)i / (num_points - 1),
-			z: -deepth,
-			feature: NORMAL
-		};
-	}
+    int num_points = 1000;
 
-	path.numPoints = num_points;
-	path.points[num_points-1].z = restHeight;
+    // rotation in degrees: 0 -> up (0, +length), 90 -> right (+length, 0)
+    float rad = rotation * (M_PI / 180.0f);
+    float dx = sinf(rad);
+    float dy = cosf(rad);
+
+    for (int i = 0; i < num_points; i++) {
+        float t = (float)i / (num_points - 1);
+        path.points[i] = Point{
+            x: xOffset + dx * length * t,
+            y: yOffset + dy * length * t,
+            z: -deepth,
+            feature: NORMAL
+        };
+    }
+
+    path.numPoints = num_points;
+    path.points[num_points - 1].z = restHeight;
 }
 
 void sinGenerator() {
@@ -28,8 +33,8 @@ void sinGenerator() {
 		float y = (pathMax_y) * (float)i / (num_points - 1);
 		float x = sinAmp * sinf((TWO_PI/sinPeriod)*y);
 		path.points[i] = Point{
-			x: x,
-			y: y,
+			x: x + xOffset,
+			y: y + yOffset,
 			z: -deepth,
 			feature: NORMAL
 		};
@@ -51,8 +56,8 @@ void zigZagGenerator() {
 		}
 		
 		path.points[i] = Point{
-			x: x,
-			y: y,
+			x: x + xOffset,
+			y: y + yOffset,
 			z: -deepth,
 			feature: NORMAL
 		};
@@ -71,14 +76,14 @@ void doubleLineGenerator() {
 		float scale = (float)i / (num_points - 1);
 		float zVal = (i == num_points - 1 || i == 0) ? restHeight : -deepth;
 		path.points[i] = Point{
-			x: -20.0,
-			y: length * scale,
+			x: -20.0f + xOffset,
+			y: length * scale + yOffset,
 			z: zVal,
 			feature: NORMAL
 		};
 		path.points[i+num_points] = Point{
-			x: 20.0,
-			y: length * (1 - scale),
+			x: 20.0f+ xOffset,
+			y: length * (1 - scale) + yOffset,
 			z: zVal,
 			feature: NORMAL
 		};
@@ -109,6 +114,68 @@ void circleGenerator() {
 	path.numPoints = num_points;
 }
 
+void rectangleGenerator() {
+    // Points per edge
+    const int edge_points = 1000;
+
+    // Orientation: 0° -> up (0,+length), 90° -> right (+length,0)
+    float rad = rotation * (M_PI / 180.0f);
+    float lx = sinf(rad);   // length direction x
+    float ly = cosf(rad);   // length direction y
+
+    // Perpendicular (width direction): right-handed relative to length direction
+    float wx = ly;
+    float wy = -lx;
+
+    // Half extents
+    float halfL = length * 0.5f;
+    float halfW = width  * 0.5f;
+
+    // Center at offsets
+    float cx = xOffset;
+    float cy = yOffset;
+
+    // Rectangle corners (counter-clockwise)
+    float x0 = cx - lx*halfL - wx*halfW;
+    float y0 = cy - ly*halfL - wy*halfW;
+
+    float x1 = cx + lx*halfL - wx*halfW;
+    float y1 = cy + ly*halfL - wy*halfW;
+
+    float x2 = cx + lx*halfL + wx*halfW;
+    float y2 = cy + ly*halfL + wy*halfW;
+
+    float x3 = cx - lx*halfL + wx*halfW;
+    float y3 = cy - ly*halfL + wy*halfW;
+
+    const int total = 4 * edge_points;
+    int idx = 0;
+
+    auto emitEdge = [&](float sx, float sy, float ex, float ey) {
+        for (int i = 0; i < edge_points; ++i, ++idx) {
+            float t = (float)i / (edge_points - 1);
+            float px = sx + (ex - sx) * t;
+            float py = sy + (ey - sy) * t;
+            float pz = (idx == 0 || idx == total - 1) ? restHeight : -deepth;
+
+            path.points[idx] = Point{
+                x: px,
+                y: py,
+                z: pz,
+                feature: NORMAL
+            };
+        }
+    };
+
+    // Emit perimeter as one continuous loop
+    emitEdge(x0, y0, x1, y1);
+    emitEdge(x1, y1, x2, y2);
+    emitEdge(x2, y2, x3, y3);
+    emitEdge(x3, y3, x0, y0);
+
+    path.numPoints = total;
+}
+
 void diamondGenerator() {
 	int num_points = 1000;
 	float angle = 60;
@@ -125,8 +192,8 @@ void diamondGenerator() {
 			int yIndex = p == 1 ? (num_points - 1 - i) : i;
 			float zVal = (i == num_points - 1 || i == 0) ? restHeight : -deepth;
 			path.points[i + p*num_points] = Point{
-				x: dirs[p] * xIndex * x_increment,
-				y: yIndex * y_increment,
+				x: dirs[p] * xIndex * x_increment + xOffset,
+				y: yIndex * y_increment + yOffset,
 				z: zVal
 			};
 		}
@@ -164,14 +231,14 @@ void squareGeneratorSine() {
 			float zVal = (i == num_points - 1 || i == 0) ? restHeight : -deepth;
 			if (p == 0) {
 				path.points[i + (2)*num_points] = Point{
-					x: dirs[p] * xIndex * x_increment,
-					y: yIndex * y_increment,
+					x: dirs[p] * xIndex * x_increment + xOffset,
+					y: yIndex * y_increment + yOffset,
 					z: zVal
 				};
 			} else {
 				path.points[i + (1)*num_points] = Point{
-					x: dirs[p] * xIndex * x_increment,
-					y: yIndex * y_increment,
+					x: dirs[p] * xIndex * x_increment + xOffset,
+					y: yIndex * y_increment + yOffset,
 					z: zVal
 				};
 			}
@@ -266,14 +333,14 @@ void squareGeneratorMake() {
 			zVal = (i == num_points - 1 || i == 0) ? restHeight : -deepth;
 			if (p == 0) {
 				path.points[i + 6*num_points] = Point{
-					x: dirs[p] * xIndex * x_increment,
-					y: yIndex * y_increment,
+					x: dirs[p] * xIndex * x_increment + xOffset,
+					y: yIndex * y_increment + yOffset,
 					z: zVal
 				};
 			} else {
 				path.points[i + 5*num_points] = Point{
-					x: dirs[p] * xIndex * x_increment,
-					y: yIndex * y_increment,
+					x: dirs[p] * xIndex * x_increment + xOffset,
+					y: yIndex * y_increment + yOffset,
 					z: zVal
 				};
 			}
@@ -289,12 +356,12 @@ void drillSquareGenerator() {
 	// TODO: modify this to work with new version
 	float l = 50.0f;
 
-	path.points[0] = Point{x: 0.0f, y: 0.0f, z: -deepth, feature: DRILL};
-	path.points[1] = Point{x: l, y: l, z: -deepth, feature: DRILL};
-	path.points[2] = Point{x: -l, y: l, z: -deepth, feature: DRILL};
-	path.points[3] = Point{x: -l, y: -l, z: -deepth, feature: DRILL};
-	path.points[4] = Point{x: l, y: -l, z: -deepth, feature: DRILL};
-	path.points[5] = Point{x: 0.0f, y: 0.0f, z: -deepth, feature: DRILL};
+	path.points[0] = Point{x: 0.0f + xOffset, y: 0.0f + yOffset, z: -deepth, feature: DRILL};
+	path.points[1] = Point{x: l + xOffset, y: l + yOffset, z: -deepth, feature: DRILL};
+	path.points[2] = Point{x: -l + xOffset, y: l + yOffset, z: -deepth, feature: DRILL};
+	path.points[3] = Point{x: -l + xOffset, y: -l + yOffset, z: -deepth, feature: DRILL};
+	path.points[4] = Point{x: l + xOffset, y: -l + yOffset, z: -deepth, feature: DRILL};
+	path.points[5] = Point{x: 0.0f + xOffset, y: 0.0f + yOffset, z: -deepth, feature: DRILL};
 
 	path.numPoints = 6;
 }
@@ -318,8 +385,9 @@ void makePresetPath(char c) {
 			Serial.println("Double line path generated!");
 			break;
 		case '4':
-			diamondGenerator();
-			Serial.println("Sine square path generated!");
+			//diamondGenerator();
+			rectangleGenerator();
+			Serial.println("Rectangle path generated!");
 			break;
 		case '5':
 			squareGeneratorSine();
