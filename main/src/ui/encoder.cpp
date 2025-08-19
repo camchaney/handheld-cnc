@@ -110,25 +110,11 @@ void encoderDesignSelect() {
 		if (designType == FROM_FILE) listFiles();
 	}
 
-	// Hack for opensauce, auto-zero XY
-	// TODO: remove this
-	if (autoZeroXY) workspaceZeroXY();
-
-	// Reset cutting path
-	running = true;
-	current_point_idx = 0;
-	if (designType != SPEED_RUN) feedrate = feedrate_default;	// reset feedrate to default (NOTE: only RMRRF addition)
-	feedrateBoost = 1.0;	// reset feedrate boost to default
-	speedRunTimer = 0;
-
-	state = READY;
-	cutState = NOT_CUT_READY;
-	ui.showCompass(true);
-
-	// Clear out sensors in case we moved while in design mode
-	for (int i = 0; i < 4; i++) {
-		sensors[i].readBurst();
-	}
+	mainMenuRoot.current = &fileCutMenu;
+	mainMenuRoot.focusIndex = 0;
+	mainMenuRoot.changed = true;
+	setCompassHandler();
+	ui.enable();
 }
 
 void encoderZeroWorkspaceXY() {

@@ -110,6 +110,7 @@ void buildMenus(MenuDrawCallback drawCallback) {
     fileCutMenu.parent = &cutDesignMenu;
     fileCutMenu.items = fileCutMenuItems;
     fileCutMenu.itemCount = sizeof(fileCutMenuItems) / sizeof(fileCutMenuItems[0]);
+    fileCutMenu.renderType = MenuItemRenderType::WithValue;
 
     presetMenu.title = "Preset";
     presetMenu.drawCallback = drawCallback;

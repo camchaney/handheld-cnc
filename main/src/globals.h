@@ -6,10 +6,10 @@
 #include <AccelStepper.h>
 #include <TMCStepper.h>
 #include <PMW3360.h>
-#include <SdFat.h>
 #include <EncoderButton.h>
 #include "config.h"
 #include "types.h"
+#include <SdFat.h>
 #include "ui/CompassUI.h"
 
 // Global object declarations

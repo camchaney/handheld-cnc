@@ -5,6 +5,7 @@ using namespace CompassMenu;
 
 extern MenuRoot mainMenuRoot;
 extern Menu mainMenu;
+extern Menu fileCutMenu;
 
 void buildMenus(MenuDrawCallback drawCallback);
 void setupMenuSystem(MenuDrawCallback drawCallback);
