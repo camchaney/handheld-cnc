@@ -19,6 +19,11 @@ void onStartCalibrate(void* ctx) {
 	calibrate();
 }
 
+void onStartRezeroXY(void* ctx) {
+	if (!ui.confirm("Rezero XY?")) return;
+	workspaceZeroXY();
+}
+
 void onClickCompassUI(EncoderButton &eb) {
 	ui.enter();
 }
@@ -45,16 +50,36 @@ void onStartSelectFile(void* ctx) {
 	encoderDesignSelect();
 }
 
-void onStartStopCut(void* ctx) {
-	if (!ui.confirm("Stop cutting?")) return;
+void onStartCancelCut(void* ctx) {
+	if (!ui.confirm("Cancel cutting?")) return;
 
 	stopCutting();
 }
 
 void onStartFileCut(void* ctx) {
-	// Hack for opensauce, auto-zero XY
-	// TODO: remove this
-	if (autoZeroXY) workspaceZeroXY();
+	startCutting();
+}
+
+void onStartPresetCut(void* ctx) {
+    Menu* item = (Menu*)ctx;
+    Serial.print("Start cutting with preset: ");
+    Serial.println(item->calledFrom->label);
+	designType = PRESET;
+	state = DESIGN_SELECTED;
+	selectedDesignPreset = item->calledFrom->label[0];
+    makePresetPath(item->calledFrom->label[0]);
+	startCutting();
+}
+
+void onStartSpeedRunCut(void* ctx) {
+	handleSpeedRun();
+	state = DESIGN_SELECTED;
+	startCutting();
+}
+
+void startCutting() {
+	if (autoZeroXY)
+		workspaceZeroXY();
 
 	// Reset cutting path
 	running = true;
@@ -68,36 +93,6 @@ void onStartFileCut(void* ctx) {
 	handleButtons.enable(false);
 	ui.showCompass(true);
 	
-	// Clear out sensors in case we moved while in design mode
-	for (int i = 0; i < 4; i++) {
-		sensors[i].readBurst();
-	}
-}
-
-void onStartPresetCut(void* ctx) {
-    Menu* item = (Menu*)ctx;
-    Serial.print("Start cutting with preset: ");
-    Serial.println(item->calledFrom->label);
-	designType = PRESET;
-	state = DESIGN_SELECTED;
-	selectedDesignPreset = item->calledFrom->label[0];
-	handleButtons.enable(false);
-	ui.showCompass(true);
-    makePresetPath(item->calledFrom->label[0]);
-
-	// Hack for opensauce, auto-zero XY
-	if (autoZeroXY) workspaceZeroXY();
-
-	// Reset cutting path
-	running = true;
-	current_point_idx = 0;
-	if (designType != SPEED_RUN) feedrate = feedrate_default;	// reset feedrate to default (NOTE: only RMRRF addition)
-	feedrateBoost = 1.0;	// reset feedrate boost to default
-	speedRunTimer = 0;
-
-	state = READY;
-	cutState = NOT_CUT_READY;
-
 	// Clear out sensors in case we moved while in design mode
 	for (int i = 0; i < 4; i++) {
 		sensors[i].readBurst();

@@ -12,6 +12,7 @@ Menu generalPresetMenu;
 Menu cutDesignMenu;
 Menu presetMenu;
 Menu fileCutMenu;
+Menu speedRunMenu;
 Menu settingsMenu;
 
 MenuItem circleItems[] = {
@@ -50,6 +51,12 @@ MenuItem fileCutMenuItems[] = {
     makeBack(),
 };
 
+MenuItem speedRunMenuItems[] = {
+    makeAction("Cut!", onStartSpeedRunCut, nullptr),
+    makeFloat("Feed Rate", &feedrate, -10000, 10000, 0.1, "mm"),
+    makeBack(),
+};
+
 MenuItem presetItems[] = {
     makeSubmenu("7", &circleMenu),
     makeSubmenu("4", &squareMenu),
@@ -59,21 +66,21 @@ MenuItem presetItems[] = {
     makeSubmenu("3", &generalPresetMenu),
     makeSubmenu("5", &generalPresetMenu),
     makeSubmenu("6", &generalPresetMenu),
-    makeSubmenu("8", &generalPresetMenu),
+    //TODO makeSubmenu("8", &generalPresetMenu),
     makeBack(),
 };
 
 MenuItem cutDesignItems[] = {
     makeSubmenu("Preset", &presetMenu),
     makeAction("From file", onStartSelectFile, nullptr),
-    makeAction("Speed Run", onStartDummy, nullptr),
+    makeSubmenu("Speed Run", &speedRunMenu),
     makeBack(),
 };
 
 MenuItem settingsItems[] = {
-    makeAction("Calibrate", onStartCalibrate, nullptr),
-    makeAction("Clear Logs", onStartDummy, nullptr),
     makeBool("Auto Zero X/Y", &autoZeroXY),
+    makeAction("Calibrate", onStartCalibrate, nullptr),
+    //FIXME makeAction("Clear Logs", onStartDummy, nullptr),
     makeBack(),
 };
 
@@ -111,6 +118,11 @@ void buildMenus(MenuDrawCallback drawCallback) {
     fileCutMenu.items = fileCutMenuItems;
     fileCutMenu.itemCount = sizeof(fileCutMenuItems) / sizeof(fileCutMenuItems[0]);
     fileCutMenu.renderType = MenuItemRenderType::WithValue;
+
+    speedRunMenu.title = "Speed Run";
+    speedRunMenu.parent = &cutDesignMenu;
+    speedRunMenu.items = speedRunMenuItems;
+    speedRunMenu.itemCount = sizeof(speedRunMenuItems) / sizeof(speedRunMenuItems[0]);
 
     presetMenu.title = "Preset";
     presetMenu.drawCallback = drawCallback;

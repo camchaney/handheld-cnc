@@ -5,26 +5,15 @@
 
 MenuRoot cutMenuRoot;
 Menu cutMenu;
-Menu stopCutMenu;
 
 MenuItem cutItems[] = {
     makeFloat("Feed Rate Boost", &feedrateBoost, 0.1, 5, 0.1, "x"),
-    makeAction("Stop", onStartStopCut, nullptr),
-    makeSubmenu("Rezero X/Y", &stopCutMenu),
+    makeAction("Cancel Cut", onStartCancelCut, nullptr),
+    makeAction("Rezero X/Y", onStartRezeroXY, nullptr),
     makeAction("Back", onCuttingMenuBack, nullptr),
 };
 
-MenuItem stopCutItems[] = {
-    makeAction("Yes", onStartDummy, nullptr),
-    makeBack("No"),
-};
-
 void setupCutMenuSystem() {
-    stopCutMenu.title = "Stop Cutting";
-    stopCutMenu.parent = &cutMenu;
-    stopCutMenu.items = stopCutItems;
-    stopCutMenu.itemCount = sizeof(stopCutItems) / sizeof(stopCutItems[0]);
-
     cutMenu.title = "";
     cutMenu.parent = nullptr;
     cutMenu.items = cutItems;
