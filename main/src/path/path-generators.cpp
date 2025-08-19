@@ -12,7 +12,7 @@ void lineGenerator() {
 		path.points[i] = Point{
 			x: 0,
 			y: (pathMax_y) * (float)i / (num_points - 1),
-			z: -matThickness,
+			z: -deepth,
 			feature: NORMAL
 		};
 	}
@@ -30,7 +30,7 @@ void sinGenerator() {
 		path.points[i] = Point{
 			x: x,
 			y: y,
-			z: -matThickness,
+			z: -deepth,
 			feature: NORMAL
 		};
 	}
@@ -53,7 +53,7 @@ void zigZagGenerator() {
 		path.points[i] = Point{
 			x: x,
 			y: y,
-			z: -matThickness,
+			z: -deepth,
 			feature: NORMAL
 		};
 	}
@@ -69,7 +69,7 @@ void doubleLineGenerator() {
 
 	for (int i = 0; i < num_points; i++) {
 		float scale = (float)i / (num_points - 1);
-		float zVal = (i == num_points - 1 || i == 0) ? restHeight : -matThickness;
+		float zVal = (i == num_points - 1 || i == 0) ? restHeight : -deepth;
 		path.points[i] = Point{
 			x: -20.0,
 			y: length * scale,
@@ -123,7 +123,7 @@ void diamondGenerator() {
 		for (int i = 0; i < num_points; i++) {
 			int xIndex = (i >= num_points / 2) ? (num_points - 1 - i) : i;
 			int yIndex = p == 1 ? (num_points - 1 - i) : i;
-			float zVal = (i == num_points - 1 || i == 0) ? restHeight : -matThickness;
+			float zVal = (i == num_points - 1 || i == 0) ? restHeight : -deepth;
 			path.points[i + p*num_points] = Point{
 				x: dirs[p] * xIndex * x_increment,
 				y: yIndex * y_increment,
@@ -141,7 +141,7 @@ void squareGeneratorSine() {
 	float angle = 45;
 	float angle_rad = angle * (M_PI / 180.0);
 	float segment_length = 100.0;
-	float engrave_depth = matThickness / 4;
+	float engrave_depth = deepth / 4;
 	int dirs[3] = {1, -1, 1};
 
 	// Generate design engraving
@@ -161,7 +161,7 @@ void squareGeneratorSine() {
 		for (int i = 0; i < num_points; i++) {
 			int xIndex = (i >= num_points / 2) ? (num_points - 1 - i) : i;
 			int yIndex = p == 1 ? (num_points - 1 - i) : i;
-			float zVal = (i == num_points - 1 || i == 0) ? restHeight : -matThickness;
+			float zVal = (i == num_points - 1 || i == 0) ? restHeight : -deepth;
 			if (p == 0) {
 				path.points[i + (2)*num_points] = Point{
 					x: dirs[p] * xIndex * x_increment,
@@ -196,7 +196,7 @@ void squareGeneratorMake() {
 	float angle = 45;
 	float angle_rad = angle * (M_PI / 180.0);
 	float segment_length = 100.0;
-	float engrave_depth = matThickness / 4;
+	float engrave_depth = deepth / 4;
 	float make_ratio = 0.3;
 	float colon_ratio = 0.6;
 	float make_length = make_ratio * segment_length;
@@ -208,7 +208,7 @@ void squareGeneratorMake() {
 	for (int i = 0; i < num_points; ++i) {
 		y = start_y + (make_length) * (float)i / (num_points - 1);
 		x = -make_length/2;
-		zVal = (i == num_points - 1 || i == 0) ? restHeight : -matThickness;
+		zVal = (i == num_points - 1 || i == 0) ? restHeight : -deepth;
 		path.points[i] = Point{x, y, zVal};
 	}
 
@@ -263,7 +263,7 @@ void squareGeneratorMake() {
 		for (int i = 0; i < num_points; i++) {
 			int xIndex = (i >= num_points / 2) ? (num_points - 1 - i) : i;
 			int yIndex = p == 1 ? (num_points - 1 - i) : i;
-			zVal = (i == num_points - 1 || i == 0) ? restHeight : -matThickness;
+			zVal = (i == num_points - 1 || i == 0) ? restHeight : -deepth;
 			if (p == 0) {
 				path.points[i + 6*num_points] = Point{
 					x: dirs[p] * xIndex * x_increment,
@@ -289,12 +289,12 @@ void drillSquareGenerator() {
 	// TODO: modify this to work with new version
 	float l = 50.0f;
 
-	path.points[0] = Point{x: 0.0f, y: 0.0f, z: -matThickness, feature: DRILL};
-	path.points[1] = Point{x: l, y: l, z: -matThickness, feature: DRILL};
-	path.points[2] = Point{x: -l, y: l, z: -matThickness, feature: DRILL};
-	path.points[3] = Point{x: -l, y: -l, z: -matThickness, feature: DRILL};
-	path.points[4] = Point{x: l, y: -l, z: -matThickness, feature: DRILL};
-	path.points[5] = Point{x: 0.0f, y: 0.0f, z: -matThickness, feature: DRILL};
+	path.points[0] = Point{x: 0.0f, y: 0.0f, z: -deepth, feature: DRILL};
+	path.points[1] = Point{x: l, y: l, z: -deepth, feature: DRILL};
+	path.points[2] = Point{x: -l, y: l, z: -deepth, feature: DRILL};
+	path.points[3] = Point{x: -l, y: -l, z: -deepth, feature: DRILL};
+	path.points[4] = Point{x: l, y: -l, z: -deepth, feature: DRILL};
+	path.points[5] = Point{x: 0.0f, y: 0.0f, z: -deepth, feature: DRILL};
 
 	path.numPoints = 6;
 }

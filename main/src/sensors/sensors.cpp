@@ -1,4 +1,5 @@
 #include "sensors.h"
+#include "../ui/callbacks.h"
 
 /*
 Sensor configuration:
@@ -372,13 +373,9 @@ void calibrate() {
 			i,tempCalScalar[0][i],tempCalScalar[1][i],tempCalRot[0][i],tempCalRot[1][i],avgRot);
 	}
 
-	const char* options[] = {"Exit", "Save!"};
-	drawMenu(options, 2, acceptCal);
-	encoder.setEncoderHandler(onEncoderAcceptCalibration);
-	encoder.setClickHandler(onClickAcceptCalibration);
-	while (state != CALIBRATION_ADVANCE) encoder.update();
-
-	if (acceptCal) {
+	encoder.setEncoderHandler(onEncoderCompassUI);
+	encoder.setClickHandler(onClickCompassUI);
+	if (!ui.confirm("Save calibration?", "Exit", "Save!")) {
 		for (int i=0; i<ns; i++) {
 			cal[i].x = tempCalScalar[0][i];
 			cal[i].y = tempCalScalar[1][i];

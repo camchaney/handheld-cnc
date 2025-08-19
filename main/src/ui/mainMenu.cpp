@@ -57,16 +57,16 @@ MenuItem presetItems[] = {
 
 MenuItem cutDesignItems[] = {
     makeSubmenu("Preset", &presetMenu),
-    makeAction("From file", onStartCalibrate, nullptr),
-    makeAction("Speed Run", onStartCalibrate, nullptr),
+    makeAction("From file", onStartDummy, nullptr),
+    makeAction("Speed Run", onStartDummy, nullptr),
     makeBack(),
 };
 
 MenuItem settingsItems[] = {
-    makeFloat("Thickness", &matThickness, 0, 100, 0.1, "mm"),
+    makeBool("Draw gCode", &drawGCode),
     makeAction("Calibrate", onStartCalibrate, nullptr),
-    makeAction("Clear Logs", onStartCalibrate, nullptr),
-    makeBool("Auto Zero X/Y", &autoZeroXY, true),
+    makeAction("Clear Logs", onStartDummy, nullptr),
+    makeBool("Auto Zero X/Y", &autoZeroXY),
     makeBack(),
 };
 

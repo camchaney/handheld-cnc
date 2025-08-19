@@ -31,13 +31,12 @@ namespace CompassMenu
         return it;
     }
 
-    MenuItem makeBool(const char *label, bool *value, bool wrap)
+    MenuItem makeBool(const char *label, bool *value)
     {
         MenuItem it;
         it.label = label;
         it.type = MenuItemType::Bool;
         it.data.boolean.value = value;
-        it.data.boolean.wrap = wrap;
         return it;
     }
 

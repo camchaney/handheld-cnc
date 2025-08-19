@@ -46,8 +46,8 @@ void handleChickenHead() {
 void handleCutting(long deltaTime) {
 	// Start of cutting Logic
 	trajectory.update(deltaTime, goal);			// update goal point
-	if (matThickness == 0.0 && designType == FROM_FILE && goal.z < 0.0) {
-		// if matThickness is set to 0 (drawing), then don't pierce!
+	if (drawGCode && designType == FROM_FILE && goal.z < 0.0) {
+		// if drawGCode is true (drawing), then don't pierce!
 		goal.z = goal.z - path.minZ;
 	}
 

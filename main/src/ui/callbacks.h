@@ -5,6 +5,7 @@
 
 void onCuttingMenuBack(void* ctx);
 void onStartCalibrate(void* ctx);
+void onStartDummy(void* ctx);
 
 void onClickCompassUI(EncoderButton &eb);
 void onDoubleClickCompassUI(EncoderButton &eb);

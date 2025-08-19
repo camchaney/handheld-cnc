@@ -1,6 +1,12 @@
 #include "globals.h"
 #include "callbacks.h"
 #include "../path/path-generators.h"
+#include "../sensors/sensors.h"
+
+void onStartDummy(void* ctx) {
+	// This is a dummy callback function that does nothing
+	Serial.println("Dummy callback called");
+}
 
 void onCuttingMenuBack(void* ctx) {
 	ui.displayState = DisplayState::Compass;
@@ -8,7 +14,7 @@ void onCuttingMenuBack(void* ctx) {
 }
 
 void onStartCalibrate(void* ctx) {
-  Serial.println("Start calibration...");
+	calibrate();
 }
 
 void onClickCompassUI(EncoderButton &eb) {
@@ -16,7 +22,10 @@ void onClickCompassUI(EncoderButton &eb) {
 }
 
 void onDoubleClickCompassUI(EncoderButton &eb) {
-	ui.back();
+	if (ui.isConfirming())
+		ui.enter(); // strange bug, first click in the confirm is detected as double click
+	else
+		ui.back();
 }
 
 void onEncoderCompassUI(EncoderButton &eb) {

@@ -2,31 +2,32 @@
 #include "../math/geometry.h"
 
 Arduino_GFX* CompassUI::screen = nullptr;
-int16_t CompassUI::tftWidth;
-int16_t CompassUI::tftHeight;
-int16_t CompassUI::centerX;
-int16_t CompassUI::centerY;
-float CompassUI::rectangleWidth;
+int16_t CompassUI::_tftWidth;
+int16_t CompassUI::_tftHeight;
+int16_t CompassUI::_centerX;
+int16_t CompassUI::_centerY;
+float CompassUI::_rectangleWidth;
 
-CompassUI::CompassUI(Arduino_GFX *screen) {
-    tftWidth = screen->width();
-    tftHeight = screen->height();
-    centerX = tftWidth / 2;
-    centerY = tftHeight / 2;
-    rectangleWidth = screen->width() / 2;
+CompassUI::CompassUI(Arduino_GFX *screen, ConfirmLoopCallback confirmLoopCallback) {
+    _tftWidth = screen->width();
+    _tftHeight = screen->height();
+    _centerX = _tftWidth / 2;
+    _centerY = _tftHeight / 2;
+    _rectangleWidth = screen->width() / 2;
     CompassUI::screen = screen;
+    this->_confirmLoopCallback = confirmLoopCallback;
 
     setupMenuSystem(drawPresetMenuItem);
     setupCutMenuSystem();
 }
 
 void CompassUI::enable(bool enable) {
-    isEnabled = enable;
+    _isEnabled = enable;
 }
 
 void CompassUI::poll() {
-    if (!isEnabled) return;
-    if (isShowCompass) return;
+    if (!_isEnabled) return;
+    if (_isShowCompass) return;
 
     render(getCurrentRoot());
 }
@@ -40,10 +41,16 @@ void CompassUI::down() {
 }
 
 void CompassUI::adjust(int increment) {
+    if (_isConfirming) {
+        _confirmSelection = (2 + _confirmSelection + increment) % 2;
+        drawConfirmMenu();
+        return;
+    }
+
     // Accelerate when the encoder spins rapidly
     uint32_t now = millis();
-    uint32_t dt = lastAdjust ? (now - lastAdjust) : 0xFFFFFFFF;
-    lastAdjust = now;
+    uint32_t dt = _lastAdjust ? (now - _lastAdjust) : 0xFFFFFFFF;
+    _lastAdjust = now;
 
     int factor = 1;
     if (dt <= 32)       factor = 100;   // very fast spin
@@ -57,20 +64,29 @@ void CompassUI::adjust(int increment) {
 }
 
 void CompassUI::enter() {
-    if (isShowCompass) {
+    if (_isConfirming) {
+        _isConfirming = false;
+        Serial.print(F("Confirm selection: "));
+        return;
+    }
+
+    if (_isShowCompass) {
          displayState = DisplayState::CuttingMenu;
         showCompass(false);
         return;
     }
+
     CompassMenu::enter(getCurrentRoot());
 }
 
 void CompassUI::back() {
+    if (_isShowCompass || _isConfirming) return;
+
     CompassMenu::back(getCurrentRoot());
 }
 
 void CompassUI::showCompass(bool show) {
-    isShowCompass = show;
+    _isShowCompass = show;
     if (show) 
         drawFixedCompassFrame();
     else
@@ -78,11 +94,25 @@ void CompassUI::showCompass(bool show) {
 }
 
 void CompassUI::home() {
-    isEnabled = true;
-    isShowCompass = false;
+    _isEnabled = true;
+    _isShowCompass = false;
     displayState = DisplayState::MainMenu;
     state = ZEROED;
     render(getCurrentRoot(), true);
+}
+
+bool CompassUI::confirm(const char* message, const char* yesText, const char* noText) {
+    _isConfirming = true;
+    this->_confirmMessage = message;
+	this->_confirmOptions[0] = yesText;
+	this->_confirmOptions[1] = noText;
+    this->_confirmSelection = 0;
+
+	drawConfirmMenu();
+
+    while (isConfirming()) _confirmLoopCallback();
+
+    return _confirmSelection == 0; // Yes selected
 }
 
 MenuRoot& CompassUI::getCurrentRoot() {
@@ -149,13 +179,13 @@ void CompassUI::drawCenteredText(const char* text, int size, uint16_t fgColor) {
     }
 
     int16_t totalHeight = lineCount * size * 10;
-    int16_t yStart = centerY - totalHeight / 2;
+    int16_t yStart = _centerY - totalHeight / 2;
 
     for (int i = 0; i < lineCount; i++) {
         int16_t x1, y1;
         uint16_t w, h;
         screen->getTextBounds(lines[i], 0, 0, &x1, &y1, &w, &h);
-        int16_t xStart = centerX - w / 2;
+        int16_t xStart = _centerX - w / 2;
         screen->setCursor(xStart, yStart + i * size * 10);
         screen->println(lines[i]);
     }
@@ -282,7 +312,7 @@ void CompassUI::drawPresetMenuItem(MenuItem* item) {
         return;
     }
 
-    int16_t size = min(tftWidth, tftHeight) / 3;
+    int16_t size = min(_tftWidth, _tftHeight) / 3;
     int16_t dot_size = 2;
 
     float scale;
@@ -293,74 +323,74 @@ void CompassUI::drawPresetMenuItem(MenuItem* item) {
         // TODO: draw an accurate representation of the design here
         case '0':
             // line
-            screen->drawLine(centerX, centerY-size, centerX, centerY+size, WHITE);
+            screen->drawLine(_centerX, _centerY - size, _centerX, _centerY + size, WHITE);
             break;
         case '1':
             // sin
             scale = size / PI;
             for (int y = -size; y <= size; y++) {
-                x = (int16_t) (scale*sin(y/scale));
-                screen->drawPixel(centerX+x, centerY+y, WHITE);
+                x = (int16_t) (scale * sin(y/scale));
+                screen->drawPixel(_centerX + x, _centerY + y, WHITE);
             }
             break;
         case '2':
             // zigzag
-            minY = centerY - size;
-            maxY = centerY + size;
-            minX = centerX - size / 2;
-            maxX = centerX + size / 2;
+            minY = _centerY - size;
+            maxY = _centerY + size;
+            minX = _centerX - size / 2;
+            maxX = _centerX + size / 2;
 
             y_quarter = minY + size / 2;
             y_3_quarter = maxY - size / 2;
 
-            screen->drawLine(centerX, minY, maxX, y_quarter, WHITE);
+            screen->drawLine(_centerX, minY, maxX, y_quarter, WHITE);
             screen->drawLine(maxX, y_quarter, minX, y_3_quarter, WHITE);
-            screen->drawLine(minX, y_3_quarter, centerX, maxY, WHITE);
+            screen->drawLine(minX, y_3_quarter, _centerX, maxY, WHITE);
 
             break;
         case '3':
             // double line
-            screen->drawLine(centerX-size/4, centerY-size, centerX-size/4, centerY+size, WHITE);
-            screen->drawLine(centerX+size/4, centerY-size, centerX+size/4, centerY+size, WHITE);
+            screen->drawLine(_centerX-size/4, _centerY-size, _centerX-size/4, _centerY+size, WHITE);
+            screen->drawLine(_centerX+size/4, _centerY-size, _centerX+size/4, _centerY+size, WHITE);
             break;
         case '4':
             // diamond
-            screen->drawLine(centerX-size, centerY, centerX, centerY+size, WHITE);
-            screen->drawLine(centerX, centerY+size, centerX+size, centerY, WHITE);
-            screen->drawLine(centerX+size, centerY, centerX, centerY-size, WHITE);
-            screen->drawLine(centerX, centerY-size, centerX-size, centerY, WHITE);
+            screen->drawLine(_centerX-size, _centerY, _centerX, _centerY+size, WHITE);
+            screen->drawLine(_centerX, _centerY+size, _centerX+size, _centerY, WHITE);
+            screen->drawLine(_centerX+size, _centerY, _centerX, _centerY-size, WHITE);
+            screen->drawLine(_centerX, _centerY-size, _centerX-size, _centerY, WHITE);
             break;
         case '5':
             // square w/ squiggly
-            screen->drawLine(centerX-size, centerY, centerX, centerY+size, WHITE);
-            screen->drawLine(centerX, centerY+size, centerX+size, centerY, WHITE);
-            screen->drawLine(centerX+size, centerY, centerX, centerY-size, WHITE);
-            screen->drawLine(centerX, centerY-size, centerX-size, centerY, WHITE);
+            screen->drawLine(_centerX-size, _centerY, _centerX, _centerY+size, WHITE);
+            screen->drawLine(_centerX, _centerY+size, _centerX+size, _centerY, WHITE);
+            screen->drawLine(_centerX+size, _centerY, _centerX, _centerY-size, WHITE);
+            screen->drawLine(_centerX, _centerY-size, _centerX-size, _centerY, WHITE);
             scale = size / PI;
             for (int y = -size; y <= size; y++) {
                 x = (int16_t) (scale*sin(y/scale));
-                screen->drawPixel(centerX+x, centerY+y, WHITE);
+                screen->drawPixel(_centerX+x, _centerY+y, WHITE);
             }
             break;
         case '6':
             // square with Make
             drawCenteredText("M:", 2, WHITE);
-            screen->drawLine(centerX-size, centerY, centerX, centerY+size, WHITE);
-            screen->drawLine(centerX, centerY+size, centerX+size, centerY, WHITE);
-            screen->drawLine(centerX+size, centerY, centerX, centerY-size, WHITE);
-            screen->drawLine(centerX, centerY-size, centerX-size, centerY, WHITE);
+            screen->drawLine(_centerX-size, _centerY, _centerX, _centerY+size, WHITE);
+            screen->drawLine(_centerX, _centerY+size, _centerX+size, _centerY, WHITE);
+            screen->drawLine(_centerX+size, _centerY, _centerX, _centerY-size, WHITE);
+            screen->drawLine(_centerX, _centerY-size, _centerX-size, _centerY, WHITE);
             break;
         case '7':
             // circle
-            screen->drawCircle(centerX, centerY, size, WHITE);
+            screen->drawCircle(_centerX, _centerY, size, WHITE);
             break;
         case '8':
             // square drill
-            screen->drawCircle(centerX-size, centerY-size, dot_size, WHITE);
-            screen->drawCircle(centerX+size, centerY-size, dot_size, WHITE);
-            screen->drawCircle(centerX-size, centerY+size, dot_size, WHITE);
-            screen->drawCircle(centerX+size, centerY+size, dot_size, WHITE);
-            screen->drawCircle(centerX, centerY, dot_size, WHITE);
+            screen->drawCircle(_centerX-size, _centerY-size, dot_size, WHITE);
+            screen->drawCircle(_centerX+size, _centerY-size, dot_size, WHITE);
+            screen->drawCircle(_centerX-size, _centerY+size, dot_size, WHITE);
+            screen->drawCircle(_centerX+size, _centerY+size, dot_size, WHITE);
+            screen->drawCircle(_centerX, _centerY, dot_size, WHITE);
             break;
         // 	// hexagon
         // 	screen->drawLine(centerX, centerY+size, centerX+size*cos(M_PI/6), centerY-size*sin(M_PI/6), WHITE);
@@ -373,24 +403,57 @@ void CompassUI::drawPresetMenuItem(MenuItem* item) {
     }
 }
 
+void CompassUI::drawConfirmMenu() {
+	screen->fillScreen(BLACK);
+
+	// Set text properties
+	screen->setTextSize(2);
+	screen->setTextColor(WHITE);
+	
+	// Calculate vertical spacing
+	int16_t yStart = screen->height() / 3;
+	int16_t ySpacing = 30;
+    
+    int16_t x1, y1;
+    uint16_t w, h;
+    screen->getTextBounds(this->_confirmMessage, 0, 0, &x1, &y1, &w, &h);
+    int16_t x = (screen->width() - w) / 2;
+    screen->setCursor(x, yStart);
+    screen->print(this->_confirmMessage);
+
+	// Draw each option
+	for (int i = 0; i < 2; i++) {
+		// Highlight selected option
+        screen->setTextColor(i == this->_confirmSelection ? YELLOW : WHITE);
+		
+		// Center text horizontally
+		screen->getTextBounds(this->_confirmOptions[i], 0, 0, &x1, &y1, &w, &h);
+		int16_t x = (screen->width() - w) / 2;
+		
+		// Draw option text
+		screen->setCursor(x, yStart + ((i + 1) * ySpacing));
+		screen->print(this->_confirmOptions[i]);
+	}
+}
+
 void CompassUI::drawFixedCompassFrame() {
     screen->fillScreen(BLACK);
     
     // Draw bounds rectangle
     screen->drawRect(
-        centerX - rectangleWidth/2,
-        centerY - rectangleWidth/2,
-        rectangleWidth,
-        rectangleWidth,
+        _centerX - _rectangleWidth / 2,
+        _centerY - _rectangleWidth / 2,
+        _rectangleWidth,
+        _rectangleWidth,
         WHITE
     );
 
     int progressRadius = (screen->width()/2) - 10;
-    for (float i = 0.0f; i < this->progress; i += 0.001f) {
+    for (float i = 0.0f; i < this->_progress; i += 0.001f) {
         float progressAngle = i * TWO_PI;
         for (int j = 0; j < 3; j++) {
-            int x = centerX + (progressRadius-1+j) * sinf(progressAngle);
-            int y = centerY - (progressRadius-1+j) * cosf(progressAngle);
+            int x = _centerX + (progressRadius-1+j) * sinf(progressAngle);
+            int y = _centerY - (progressRadius-1+j) * cosf(progressAngle);
             screen->drawPixel(x, y, GREEN);
         }
     }
@@ -398,7 +461,7 @@ void CompassUI::drawFixedCompassFrame() {
 
 void CompassUI::drawCompass(Position desPosition, float progress, uint8_t i) {
     float padding = 6;
-    float windowSize = rectangleWidth - 2*padding;
+    float windowSize = _rectangleWidth - 2*padding;
     int progressRadius = (screen->width()/2) - 10;
     float progressAngle = progress * TWO_PI;
     
@@ -408,31 +471,31 @@ void CompassUI::drawCompass(Position desPosition, float progress, uint8_t i) {
     switch (i%4) {
         case 0:
             // draw the center target
-            screen->drawLine(centerX, centerY-5, centerX, centerY+5, WHITE);
-            screen->drawLine(centerX-15, centerY, centerX+15, centerY, WHITE);
+            screen->drawLine(_centerX, _centerY-5, _centerX, _centerY+5, WHITE);
+            screen->drawLine(_centerX-15, _centerY, _centerX+15, _centerY, WHITE);
             break;
         case 1:
             // clear the old target circle
-            screen->drawCircle(lastTargetCircleX, lastTargetCircleY, 5, BLACK);
+            screen->drawCircle(_lastTargetCircleX, _lastTargetCircleY, 5, BLACK);
             break;
         case 2:
             // draw new target circle
-            lastTargetCircleX = centerX + dx;
-            lastTargetCircleY = centerY + dy;
+            _lastTargetCircleX = _centerX + dx;
+            _lastTargetCircleY = _centerY + dy;
 
             if (cutState == NOT_CUT_READY) {
-                screen->drawCircle(lastTargetCircleX, lastTargetCircleY, 5, RED);
+                screen->drawCircle(_lastTargetCircleX, _lastTargetCircleY, 5, RED);
             } else if (cutState == NOT_USER_READY) {
-                screen->drawCircle(lastTargetCircleX, lastTargetCircleY, 5, YELLOW);
+                screen->drawCircle(_lastTargetCircleX, _lastTargetCircleY, 5, YELLOW);
             } else {
-                screen->drawCircle(lastTargetCircleX, lastTargetCircleY, 5, GREEN);
+                screen->drawCircle(_lastTargetCircleX, _lastTargetCircleY, 5, GREEN);
             }
                 
             break;
         case 3:
             for (int i = 0; i < 3; i++) {
-                int x = centerX + (progressRadius-1+i) * sinf(progressAngle);
-                int y = centerY - (progressRadius-1+i) * cosf(progressAngle);
+                int x = _centerX + (progressRadius-1+i) * sinf(progressAngle);
+                int y = _centerY - (progressRadius-1+i) * cosf(progressAngle);
                 screen->drawPixel(x, y, GREEN);
             }
             break;
@@ -440,8 +503,8 @@ void CompassUI::drawCompass(Position desPosition, float progress, uint8_t i) {
 }
 
 void CompassUI::updateCompass(Position desPosition, float progress) {
-    this->progress = progress;
-    if (!isShowCompass) return;
+    this->_progress = progress;
+    if (!_isShowCompass) return;
 
     if ((millis() - lastDraw) > 15) {
         iter = (iter + 1)%4;

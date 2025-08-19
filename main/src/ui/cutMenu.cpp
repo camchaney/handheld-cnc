@@ -16,7 +16,7 @@ MenuItem cutItems[] = {
 };
 
 MenuItem stopCutItems[] = {
-    makeAction("Yes", onStartCalibrate, nullptr),
+    makeAction("Yes", onStartDummy, nullptr),
     makeBack("No"),
 };
 

@@ -12,7 +12,7 @@ EncoderButton encoder(ENCODER_PIN_A, ENCODER_PIN_B, ENCODER_BUTT);
 Arduino_DataBus *bus = new Arduino_HWSPI(TFT_DC, TFT_CS, &SPI1);
 Arduino_GFX *screen = new Arduino_GC9A01(bus, TFT_RST, 2, true);
 SdFat sd;
-CompassUI ui(screen);
+CompassUI ui(screen, []() { encoder.update(); });
 
 // State variables
 State state = POWER_ON;
@@ -61,8 +61,8 @@ int acceptCal = 0;					// accept calibration or not
 int pauseSelection = 0;					// pause menu selection
 bool autoZeroXY = true;
 
-// Material properties
-float matThickness = 0.0;
+// gCode parameters
+bool drawGCode = false;			// draw gCode, do not penetrate paper
 
 // Preset parameters
 float radius = 30.0;

@@ -71,8 +71,8 @@ extern int pauseSelection;
 extern char selectedDesignPreset;
 extern bool autoZeroXY;
 
-// Material properties
-extern float matThickness;
+// gCode parameters
+extern bool drawGCode;
 
 // Preset parameters
 extern float radius;
