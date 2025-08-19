@@ -10,7 +10,7 @@ TMC2209Stepper driverZ(&SERIAL_PORT, R_SENSE, DRIVER_ADDRESS_Z);
 PMW3360 sensors[4];
 EncoderButton encoder(ENCODER_PIN_A, ENCODER_PIN_B, ENCODER_BUTT);
 Arduino_DataBus *bus = new Arduino_HWSPI(TFT_DC, TFT_CS, &SPI1);
-Arduino_GFX *screen = new Arduino_GC9A01(bus, TFT_RST, 2, true);
+Arduino_GFX *screen = new Arduino_GC9A01(bus, TFT_RST, 0, true);
 SdFat sd;
 CompassUI ui(screen, []() { encoder.update(); });
 
