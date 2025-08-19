@@ -50,7 +50,6 @@ void onStartPresetCut(void* ctx) {
 	selectedDesignPreset = item->calledFrom->label[0];
 	ui.showCompass(true);
     makePresetPath(item->calledFrom->label[0]);
-	workspaceZeroXY();
 
 	// Hack for opensauce, auto-zero XY
 	if (autoZeroXY) workspaceZeroXY();
