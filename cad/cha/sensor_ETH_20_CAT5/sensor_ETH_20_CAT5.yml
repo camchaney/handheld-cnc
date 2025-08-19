@@ -25,7 +25,7 @@ cables:
     #color_code: DIN # auto-assign colors based on DIN 47100
     #colors: [RD, BNRD, PK, GY, YE, GN, BN, WH]
     #shield: true # add cable shielding
-    type: CAT5
+    type: CAT5 (STRANDED)
     notes: Similar colors are in a twisted pair.
 
 # TODO: make this work
