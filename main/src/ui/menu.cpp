@@ -1,4 +1,5 @@
 #include "menu.h"
+#include <Arduino.h>
 
 namespace CompassMenu
 {
@@ -126,7 +127,7 @@ namespace CompassMenu
         root.changed = true;
     }
 
-    void adjustCurrent(MenuRoot &root, int delta)
+    void adjustCurrent(MenuRoot &root, int increment)
     {
         if (!root.current || root.focusIndex >= root.current->itemCount) return;
         MenuItem &it = root.current->items[root.focusIndex];
@@ -134,24 +135,18 @@ namespace CompassMenu
         if (it.type == MenuItemType::Int && root.editState.editing && it.data.integer.value)
         {
             int v = *(it.data.integer.value);
-            int step = (delta >= 0 ? it.data.integer.step : -it.data.integer.step);
+            int step = it.data.integer.step * increment;
             v += step;
-            if (v < it.data.integer.minVal)
-                v = it.data.integer.minVal;
-            if (v > it.data.integer.maxVal)
-                v = it.data.integer.maxVal;
+            v = constrain(v, it.data.integer.minVal, it.data.integer.maxVal);
             *(it.data.integer.value) = v;
             root.changed = true;
         }
         else if (it.type == MenuItemType::Float && root.editState.editing && it.data.floating.value)
         {
             float v = *(it.data.floating.value);
-            float step = (delta >= 0 ? it.data.floating.step : -it.data.floating.step);
+            float step = it.data.floating.step * increment;
             v += step;
-            if (v < it.data.floating.minVal)
-                v = it.data.floating.minVal;
-            if (v > it.data.floating.maxVal)
-                v = it.data.floating.maxVal;
+            v = constrain(v, it.data.floating.minVal, it.data.floating.maxVal);
             *(it.data.floating.value) = v;
             root.changed = true;
         }
@@ -162,7 +157,7 @@ namespace CompassMenu
         }
         else
         {
-            if (delta > 0)
+            if (increment > 0)
                 focusNext(root);
             else
                 focusPrev(root);

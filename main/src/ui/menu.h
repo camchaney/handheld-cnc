@@ -70,6 +70,6 @@ namespace CompassMenu {
   void focusPrev(MenuRoot& root);
   void back(MenuRoot& root);
   void enter(MenuRoot& root);
-  void adjustCurrent(MenuRoot& root, int delta);
+  void adjustCurrent(MenuRoot& root, int increment);
 }
 #endif // menu_h

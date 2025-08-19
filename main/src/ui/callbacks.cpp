@@ -15,6 +15,10 @@ void onClickCompassUI(EncoderButton &eb) {
 	ui.enter();
 }
 
+void onDoubleClickCompassUI(EncoderButton &eb) {
+	ui.back();
+}
+
 void onEncoderCompassUI(EncoderButton &eb) {
 	ui.adjust(eb.increment());
 }

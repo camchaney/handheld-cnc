@@ -40,7 +40,20 @@ void CompassUI::down() {
 }
 
 void CompassUI::adjust(int increment) {
-    CompassMenu::adjustCurrent(getCurrentRoot(), increment);
+    // Accelerate when the encoder spins rapidly
+    uint32_t now = millis();
+    uint32_t dt = lastAdjust ? (now - lastAdjust) : 0xFFFFFFFF;
+    lastAdjust = now;
+
+    int factor = 1;
+    if (dt <= 32)       factor = 100;   // very fast spin
+    else if (dt <= 64) factor = 20;   // fast
+    else if (dt <= 128) factor = 5;   // moderate
+
+    Serial.print(F("Adjusting by ")); Serial.print(increment); Serial.print(F(" (factor: ")); Serial.print(factor); Serial.println(F(")"));
+
+    int scaled = increment * factor;
+    CompassMenu::adjustCurrent(getCurrentRoot(), scaled);
 }
 
 void CompassUI::enter() {

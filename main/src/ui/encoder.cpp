@@ -24,6 +24,7 @@ void onClickZeroWorkspaceZ(EncoderButton &eb) {
 	workspaceZeroZ();
 	state = WORKSPACE_Z_ZERO;
 	encoder.setClickHandler(onClickCompassUI);
+	encoder.setDoubleClickHandler(onDoubleClickCompassUI);
 	encoder.setEncoderHandler(onEncoderCompassUI);
 	//TODO Set handle button to compass UI
 	ui.enable();

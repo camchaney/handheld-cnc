@@ -41,8 +41,9 @@ private:
     static int16_t centerX;
     static int16_t centerY;
     static float rectangleWidth;
-    int16_t lastTargetCircleX, lastTargetCircleY;
     uint8_t iter = 0;
+    int16_t lastTargetCircleX, lastTargetCircleY;
+    uint32_t lastAdjust = 0;
     unsigned long lastChanged = 0;
     unsigned long lastDraw = 0;
     float progress = 0.0f;
