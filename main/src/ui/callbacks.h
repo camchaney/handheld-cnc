@@ -4,6 +4,9 @@
 #include "globals.h"
 
 void onCuttingMenuBack(void* ctx);
+void onStartPresetCut(void* ctx);
+void onStartSelectFile(void* ctx);
+void onStartFileCut(void* ctx);
 void onStartCalibrate(void* ctx);
 void onStartDummy(void* ctx);
 

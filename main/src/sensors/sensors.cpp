@@ -373,8 +373,7 @@ void calibrate() {
 			i,tempCalScalar[0][i],tempCalScalar[1][i],tempCalRot[0][i],tempCalRot[1][i],avgRot);
 	}
 
-	encoder.setEncoderHandler(onEncoderCompassUI);
-	encoder.setClickHandler(onClickCompassUI);
+	setCompassHandler();
 	if (!ui.confirm("Save calibration?", "Exit", "Save!")) {
 		for (int i=0; i<ns; i++) {
 			cal[i].x = tempCalScalar[0][i];

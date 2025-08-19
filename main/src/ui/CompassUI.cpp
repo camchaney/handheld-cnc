@@ -87,10 +87,14 @@ void CompassUI::back() {
 
 void CompassUI::showCompass(bool show) {
     _isShowCompass = show;
-    if (show) 
-        drawFixedCompassFrame();
-    else
+    if (!show) {
         render(getCurrentRoot(), true);
+        return;
+    }
+    
+    enable();
+    displayState = DisplayState::Compass;
+    drawFixedCompassFrame();
 }
 
 void CompassUI::home() {

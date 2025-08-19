@@ -33,4 +33,6 @@ void encoderDesignSelect();
 void encoderZeroWorkspaceXY();
 void encoderEndScreen();
 
+// Compass UI Functions
+void setCompassHandler();
 #endif

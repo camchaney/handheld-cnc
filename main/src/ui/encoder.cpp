@@ -23,10 +23,7 @@ void onClickZeroWorkspaceZ(EncoderButton &eb) {
 	drawCenteredText("Zeroing Workspace Z...", 2);
 	workspaceZeroZ();
 	state = WORKSPACE_Z_ZERO;
-	encoder.setClickHandler(onClickCompassUI);
-	encoder.setDoubleClickHandler(onDoubleClickCompassUI);
-	encoder.setEncoderHandler(onEncoderCompassUI);
-	//TODO Set handle button to compass UI
+	setCompassHandler();
 	ui.enable();
 }
 
@@ -104,12 +101,6 @@ void encoderDesignSelect() {
 	if (designType == FROM_FILE){
 		updateFileList();
 		listFiles();
-	} else {
-		char text2send[50];
-		sprintf(text2send, "Turn to\nset speed\n%.2f mm/s", feedrate);
-		drawCenteredText(text2send, 2);
-
-		encoder.setEncoderHandler(onEncoderSetSpeed);
 	}
 	
 	closeSDFile();
@@ -121,7 +112,7 @@ void encoderDesignSelect() {
 
 	// Hack for opensauce, auto-zero XY
 	// TODO: remove this
-	workspaceZeroXY();
+	if (autoZeroXY) workspaceZeroXY();
 
 	// Reset cutting path
 	running = true;
@@ -132,9 +123,7 @@ void encoderDesignSelect() {
 
 	state = READY;
 	cutState = NOT_CUT_READY;
-
-	screen->fillScreen(BLACK);
-	drawFixedUI();
+	ui.showCompass(true);
 
 	// Clear out sensors in case we moved while in design mode
 	for (int i = 0; i < 4; i++) {
@@ -180,4 +169,12 @@ void encoderEndScreen() {
 	while (state != POWER_ON) {
 		encoder.update();
 	}
+}
+
+void setCompassHandler() {
+	encoder.setClickHandler(onClickCompassUI);
+	encoder.setDoubleClickHandler(onDoubleClickCompassUI);
+	encoder.setEncoderHandler(onEncoderCompassUI);
+	
+	//TODO Set handle button to compass UI
 }

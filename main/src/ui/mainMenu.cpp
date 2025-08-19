@@ -11,6 +11,7 @@ Menu squareMenu;
 Menu generalPresetMenu;
 Menu cutDesignMenu;
 Menu presetMenu;
+Menu fileCutMenu;
 Menu settingsMenu;
 
 MenuItem circleItems[] = {
@@ -41,6 +42,14 @@ MenuItem generalPresetMenuItems[] = {
     makeBack(),
 };
 
+MenuItem fileCutMenuItems[] = {
+    makeAction("Cut!", onStartFileCut, nullptr),
+    makeFloat("X Offset", &xOffset, -10000, 10000, 0.1, "mm"),
+    makeFloat("Y Offset", &yOffset, -10000, 10000, 0.1, "mm"),
+    makeBool("Draw", &drawGCode),
+    makeBack(),
+};
+
 MenuItem presetItems[] = {
     makeSubmenu("7", &circleMenu),
     makeSubmenu("4", &squareMenu),
@@ -56,13 +65,12 @@ MenuItem presetItems[] = {
 
 MenuItem cutDesignItems[] = {
     makeSubmenu("Preset", &presetMenu),
-    makeAction("From file", onStartDummy, nullptr),
+    makeAction("From file", onStartSelectFile, nullptr),
     makeAction("Speed Run", onStartDummy, nullptr),
     makeBack(),
 };
 
 MenuItem settingsItems[] = {
-    makeBool("Draw gCode", &drawGCode),
     makeAction("Calibrate", onStartCalibrate, nullptr),
     makeAction("Clear Logs", onStartDummy, nullptr),
     makeBool("Auto Zero X/Y", &autoZeroXY),
@@ -97,6 +105,11 @@ void buildMenus(MenuDrawCallback drawCallback) {
     cutDesignMenu.parent = &mainMenu;
     cutDesignMenu.items = cutDesignItems;
     cutDesignMenu.itemCount = sizeof(cutDesignItems) / sizeof(cutDesignItems[0]);
+
+    fileCutMenu.title = "Cut File";
+    fileCutMenu.parent = &cutDesignMenu;
+    fileCutMenu.items = fileCutMenuItems;
+    fileCutMenu.itemCount = sizeof(fileCutMenuItems) / sizeof(fileCutMenuItems[0]);
 
     presetMenu.title = "Preset";
     presetMenu.drawCallback = drawCallback;

@@ -7,7 +7,6 @@ MenuRoot cutMenuRoot;
 Menu cutMenu;
 Menu stopCutMenu;
 
-
 MenuItem cutItems[] = {
     makeFloat("Feed Rate Boost", &feedrateBoost, 0.1, 5, 0.1, "x"),
     makeSubmenu("Stop", &stopCutMenu),

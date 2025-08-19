@@ -9,7 +9,6 @@ void onStartDummy(void* ctx) {
 }
 
 void onCuttingMenuBack(void* ctx) {
-	ui.displayState = DisplayState::Compass;
 	ui.showCompass(true);
 }
 
@@ -32,6 +31,16 @@ void onEncoderCompassUI(EncoderButton &eb) {
 	ui.adjust(eb.increment());
 }
 
+void onStartSelectFile(void* ctx) {
+	ui.enable(false);
+	designType = FROM_FILE;
+	encoderDesignSelect();
+}
+
+void onStartFileCut(void* ctx) {
+	Serial.println("Start file cutting...");
+}
+
 void onStartPresetCut(void* ctx) {
     Menu* item = (Menu*)ctx;
     Serial.print("Start cutting with preset: ");
@@ -39,13 +48,12 @@ void onStartPresetCut(void* ctx) {
 	designType = PRESET;
 	state = DESIGN_SELECTED;
 	selectedDesignPreset = item->calledFrom->label[0];
-	ui.displayState = DisplayState::Compass;
 	ui.showCompass(true);
     makePresetPath(item->calledFrom->label[0]);
 	workspaceZeroXY();
 
 	// Hack for opensauce, auto-zero XY
-	if (autoZeroXY)	workspaceZeroXY();
+	if (autoZeroXY) workspaceZeroXY();
 
 	// Reset cutting path
 	running = true;
