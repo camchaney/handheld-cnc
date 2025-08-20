@@ -1,4 +1,5 @@
 #include "sensors.h"
+#include "../ui/callbacks.h"
 
 /*
 Sensor configuration:
@@ -302,9 +303,9 @@ void calibrate() {
 	for (int axis = 0; axis < 2; axis++) {
 		while (currentRun < numRuns) {
 			if (axis == 0) {
-				drawCenteredText("Align X axis\nClick when at 0", 2);
+				ui.drawCenteredText("Align X axis\nClick when at 0", 2);
 			} else {
-				drawCenteredText("Align Y axis\nClick when at 0", 2);
+				ui.drawCenteredText("Align Y axis\nClick when at 0", 2);
 			}
 			// draw circular progress bar based on run number
 			int progressRadius = (screen->width()/2) - 10;
@@ -336,9 +337,9 @@ void calibrate() {
 			//		- "Reached 300?"
 			// 		- "Retry?"
 			if (axis == 0) {
-				drawCenteredText("Move in +X\nClick when at 300mm", 2);
+				ui.drawCenteredText("Move in +X\nClick when at 300mm", 2);
 			} else {
-				drawCenteredText("Move in +Y\nClick when at 300mm", 2);
+				ui.drawCenteredText("Move in +Y\nClick when at 300mm", 2);
 			}
 
 			while (state != CALIBRATION_ADVANCE) {
@@ -372,13 +373,8 @@ void calibrate() {
 			i,tempCalScalar[0][i],tempCalScalar[1][i],tempCalRot[0][i],tempCalRot[1][i],avgRot);
 	}
 
-	const char* options[] = {"Exit", "Save!"};
-	drawMenu(options, 2, acceptCal);
-	encoder.setEncoderHandler(onEncoderAcceptCalibration);
-	encoder.setClickHandler(onClickAcceptCalibration);
-	while (state != CALIBRATION_ADVANCE) encoder.update();
-
-	if (acceptCal) {
+	setCompassHandler();
+	if (!ui.confirm("Save calibration?", "Exit", "Save!")) {
 		for (int i=0; i<ns; i++) {
 			cal[i].x = tempCalScalar[0][i];
 			cal[i].y = tempCalScalar[1][i];
@@ -392,9 +388,7 @@ void calibrate() {
 		for (int i = 0; i < ns; i++) {
 			Serial.printf("Sensor %i:\tCx:%.4f, Cy:%.4f, Cr:%.4f\n", i, cal[i].x, cal[i].y, cal[i].r);
 		}
-
-		encoderDesignType();
-	} else {
-		encoderDesignOrCalibrate();
 	}
+
+	ui.home();
 }

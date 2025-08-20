@@ -211,11 +211,11 @@ void parseGCodeFile(const String& sFilename) {
 					else if (atof(ptr+1) == 80) newPoint.feature = NORMAL; 		// G80 cancels current command (used in drill cycle)
 					break;
 				case 'X':
-					newPoint.x = atof(ptr + 1);
+					newPoint.x = atof(ptr + 1) + xOffset;
 					hasNewCoordinate = true;
 					break;
 				case 'Y':
-					newPoint.y = atof(ptr + 1);
+					newPoint.y = atof(ptr + 1) + yOffset;
 					hasNewCoordinate = true;
 					break;
 				case 'Z':
@@ -417,7 +417,12 @@ bool initializeLogFile() {
 	if (logFile) {
 		logFile.close();
 	}
-	
+
+	if (!settings.enableLogging) {
+		Serial.println("Logging is disabled");
+		return false;
+	}
+
 	// Create logFiles directory if it doesn't exist
 	if (!sd.exists("logFiles")) {
 		if (!sd.mkdir("logFiles")) {
@@ -575,7 +580,7 @@ void logPath() {
 
 		if (designType == PRESET) {
 			char designName[MAX_STRING_LENGTH];
-			sprintf(designName, "preset_%i", designPreset);
+			sprintf(designName, "preset_%c", selectedDesignPreset);
 			writeFileHeader(designName, path.numPoints);
 		} else {
 			writeFileHeader(filename, path.numPoints);

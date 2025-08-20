@@ -4,12 +4,12 @@
 #include "globals.h"
 #include "actuation/motors.h"
 #include "sensors/sensors.h"
-#include "ui/display.h"
 #include "ui/encoder.h"
 #include "path/path-generators.h"
 #include "path/path-execution.h"
 #include "math/geometry.h"
 #include "io/logging.h"
+#include "io/settings.h"
 
 void setup() {
 	Serial.begin(115200);  
@@ -21,11 +21,14 @@ void setup() {
 
 	screen->fillScreen(BLACK);
 
-	drawCenteredText("Initializing...", 2);
+	ui.drawCenteredText("Initializing...", 2);
 	delay(200);
 
 	Serial.println("Loading calibration coefficients:");
 	readEepromCalibration();
+
+	Serial.println("Loading settings...");
+	loadSettings();
 
 	for (int i = 0; i < ns; i++) {
 		Serial.printf("Sensor %i:\tCx:%.4f, Cy:%.4f, Cr:%.4f\n", i, cal[i].x, cal[i].y, cal[i].r);
@@ -50,9 +53,8 @@ void setup() {
 		Serial.println("Initialization done.");
 	}
 
-	drawCenteredText("Zero Machine XY", 2);
+	ui.drawCenteredText("Zero Machine XY", 2);
 	encoder.setClickHandler(onClickZeroMachineXY);
-	encoder.setTripleClickHandler(onClickResetState);
 }
 
 void loop() {
@@ -67,6 +69,7 @@ void loop() {
 	stepperL.run();
 	stepperZ.run();
 	encoder.update();
+	ui.poll();
 
 	// Serial handling
 	handleSerial();

@@ -15,7 +15,7 @@ void squareGeneratorSine();
 void squareGeneratorWave();
 void squareGeneratorMake();
 void drillSquareGenerator();
-void makePresetPath();
+void makePresetPath(char c);
 
 // Path properties
 extern const float sinAmp;

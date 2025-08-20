@@ -1,15 +1,16 @@
 #ifndef GLOBALS_H
 #define GLOBALS_H
 
+#include <Arduino_GFX_Library.h>
 #include <Arduino.h>
 #include <AccelStepper.h>
 #include <TMCStepper.h>
 #include <PMW3360.h>
-#include <SdFat.h>
-#include <Arduino_GFX_Library.h>
 #include <EncoderButton.h>
 #include "config.h"
 #include "types.h"
+#include <SdFat.h>
+#include "ui/CompassUI.h"
 
 // Global object declarations
 extern AccelStepper stepperR;
@@ -22,6 +23,7 @@ extern PMW3360 sensors[4];
 extern EncoderButton encoder;
 extern Arduino_GFX *screen;
 extern SdFat sd;
+extern CompassUI ui;
 
 // State variables
 extern State state;
@@ -63,13 +65,23 @@ extern bool debuggingOn;
 extern bool stopwatchOn;
 extern bool outputSerialOn;
 extern bool outputSDOn;
-extern int designOrCalibrate;
-extern int acceptCal;
-extern int designPreset;
-extern int pauseSelection;
+extern char selectedDesignPreset;
 
-// Material properties
-extern float matThickness;
+// Persistent settings
+#define SETTINGS_ADDRESS 128 // EEPROM Address for settings
+extern Settings settings;
+
+// gCode parameters
+extern bool drawGCode;
+
+// Preset parameters
+extern float radius;
+extern float length;
+extern float width;
+extern float deepth;
+extern float xOffset;
+extern float yOffset;
+extern float rotation;
 
 // Timing variables
 extern long unsigned totalLoopTime;

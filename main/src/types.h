@@ -2,6 +2,7 @@
 #define TYPES_H
 
 #include "config.h"
+#define SETTINGS_VERSION 1 // Version of settings structure
 
 extern float maxHeight;	// max height of the workspace (mm)
 
@@ -12,16 +13,11 @@ typedef enum State {
 	MACHINE_XY_ZERO,
 	WORKSPACE_Z_ZERO,
 	ZEROED,
-	THICKNESS_SET,
-	DOC_SELECTED,
 	CALIBRATION,
 	CALIBRATION_ADVANCE,
-	TYPE_SELECTED,
 	SELECTING_DESIGN,
 	DESIGN_SELECTED,
-	WORKSPACE_XY_ZERO,
-	READY,
-	STANDBY
+	READY
 } State;
 
 typedef enum CutState {
@@ -136,4 +132,10 @@ typedef struct Path {
 	float minZ = 0.0f;
 } Path;
 
+// Persistent settings
+typedef struct Settings {
+	int version = SETTINGS_VERSION;			// version of the settings structure
+	bool autoZeroXY = true;					// automatically zero XY on cut start
+	bool enableLogging = true;				// enable logging to SD card
+} Settings;
 #endif

@@ -8,6 +8,7 @@ TrajectoryGenerator trajectory;
 ActuationController actuator(desPos);
 
 bool checkEndstops() {
+	//TODO: check stepper looks strange
 	if (digitalRead(LIMIT_MACH_X0) == LOW) {
 		stopStepperX();
 		stepperZ.moveTo(ConvLead*restHeight);
@@ -15,7 +16,7 @@ bool checkEndstops() {
 			stepperZ.run();
 		}
 		Serial.println("X limit reached");
-		encoderDesignType();
+		ui.showCompass(false);
 		return false;
 	}
 
@@ -23,7 +24,7 @@ bool checkEndstops() {
 		stopStepperZ();
 		stopStepperX();
 		Serial.println("Z limit reached");
-		encoderDesignType();
+		ui.showCompass(false);
 		return false;
 	}
 
@@ -45,8 +46,8 @@ void handleChickenHead() {
 void handleCutting(long deltaTime) {
 	// Start of cutting Logic
 	trajectory.update(deltaTime, goal);			// update goal point
-	if (matThickness == 0.0 && designType == FROM_FILE && goal.z < 0.0) {
-		// if matThickness is set to 0 (drawing), then don't pierce!
+	if (drawGCode && designType == FROM_FILE && goal.z < 0.0) {
+		// if drawGCode is true (drawing), then don't pierce!
 		goal.z = goal.z - path.minZ;
 	}
 
@@ -94,6 +95,8 @@ void handleCutting(long deltaTime) {
 		stepperZ.moveTo(ConvLead*restHeight);
 	} else if (valid_sensors){
 		// All good to go!
+		if (!running) ui.showCompass(true);
+
 		running = true;
 		cutState = CUTTING;
 		
@@ -107,7 +110,7 @@ void handleCutting(long deltaTime) {
 	}
 
 	// Update UI
-	updateUI(desPos, (float)current_point_idx/(float)path.numPoints);
+	ui.updateCompass(desPos, (float)current_point_idx/(float)path.numPoints);
 
 	// Path logging
 	// TODO: make this more clean (without pass by reference)
@@ -117,4 +120,9 @@ void handleCutting(long deltaTime) {
 
 	// Debugging
 	if (debuggingOn) debugging(goal, desPos);
+}
+
+void stopCutting() {
+	// Stop the trajectory generator
+	trajectory.stop(goal);
 }
