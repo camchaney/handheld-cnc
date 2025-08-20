@@ -2,6 +2,7 @@
 #define TYPES_H
 
 #include "config.h"
+#define SETTINGS_VERSION 1 // Version of settings structure
 
 extern float maxHeight;	// max height of the workspace (mm)
 
@@ -131,4 +132,10 @@ typedef struct Path {
 	float minZ = 0.0f;
 } Path;
 
+// Persistent settings
+typedef struct Settings {
+	int version = SETTINGS_VERSION;			// version of the settings structure
+	bool autoZeroXY = true;					// automatically zero XY on cut start
+	bool enableLogging = true;				// enable logging to SD card
+} Settings;
 #endif

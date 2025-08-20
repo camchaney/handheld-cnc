@@ -3,6 +3,7 @@
 #include "../path/path-generators.h"
 #include "../path/path-execution.h"
 #include "../sensors/sensors.h"
+#include "../io/settings.h"
 
 void onStartDummy(void* ctx) {
 	// This is a dummy callback function that does nothing
@@ -33,6 +34,11 @@ void onDoubleClickCompassUI(EncoderButton &eb) {
 
 void onEncoderCompassUI(EncoderButton &eb) {
 	ui.adjust(eb.increment());
+}
+
+void onStartSaveSettings(void* ctx) {
+	if (!ui.confirm("Save settings?")) return;
+	saveSettings();
 }
 
 void onStartSelectFile(void* ctx) {
@@ -69,7 +75,7 @@ void onStartSpeedRunCut(void* ctx) {
 }
 
 void startCutting() {
-	if (autoZeroXY)
+	if (settings.autoZeroXY)
 		workspaceZeroXY();
 
 	// Reset cutting path

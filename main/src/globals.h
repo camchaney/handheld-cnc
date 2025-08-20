@@ -66,7 +66,10 @@ extern bool stopwatchOn;
 extern bool outputSerialOn;
 extern bool outputSDOn;
 extern char selectedDesignPreset;
-extern bool autoZeroXY;
+
+// Persistent settings
+#define SETTINGS_ADDRESS 128 // EEPROM Address for settings
+extern Settings settings;
 
 // gCode parameters
 extern bool drawGCode;

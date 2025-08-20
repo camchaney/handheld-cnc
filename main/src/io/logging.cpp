@@ -417,7 +417,12 @@ bool initializeLogFile() {
 	if (logFile) {
 		logFile.close();
 	}
-	
+
+	if (!settings.enableLogging) {
+		Serial.println("Logging is disabled");
+		return false;
+	}
+
 	// Create logFiles directory if it doesn't exist
 	if (!sd.exists("logFiles")) {
 		if (!sd.mkdir("logFiles")) {

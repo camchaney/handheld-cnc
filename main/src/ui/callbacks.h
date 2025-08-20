@@ -11,6 +11,7 @@ void onStartSelectFile(void* ctx);
 void onStartCancelCut(void* ctx);
 void onStartCalibrate(void* ctx);
 void onStartRezeroXY(void* ctx);
+void onStartSaveSettings(void* ctx);
 
 void onClickCompassUI(EncoderButton &eb);
 void onDoubleClickCompassUI(EncoderButton &eb);

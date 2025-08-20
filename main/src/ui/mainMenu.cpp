@@ -14,6 +14,7 @@ Menu presetMenu;
 Menu fileCutMenu;
 Menu speedRunMenu;
 Menu settingsMenu;
+Menu persistentSettingsMenu;
 
 MenuItem circleItems[] = {
     makeAction("Cut!", onStartPresetCut, &circleMenu),
@@ -78,9 +79,17 @@ MenuItem cutDesignItems[] = {
 };
 
 MenuItem settingsItems[] = {
-    makeBool("Auto Zero X/Y", &autoZeroXY),
+    makeBool("Auto Zero X/Y", &settings.autoZeroXY),
     makeAction("Calibrate", onStartCalibrate, nullptr),
+    makeSubmenu("Stored Settings", &persistentSettingsMenu),
     //FIXME makeAction("Clear Logs", onStartDummy, nullptr),
+    makeBack(),
+};
+
+MenuItem persistentSettingsMenuItems[] = {
+    makeBool("Auto Zero X/Y", &settings.autoZeroXY),
+    makeBool("Enable Logging", &settings.enableLogging),
+    makeAction("Save Settings", onStartSaveSettings, nullptr),
     makeBack(),
 };
 
@@ -135,6 +144,11 @@ void buildMenus(MenuDrawCallback drawCallback) {
     settingsMenu.parent = &mainMenu;
     settingsMenu.items = settingsItems;
     settingsMenu.itemCount = sizeof(settingsItems) / sizeof(settingsItems[0]);
+
+    persistentSettingsMenu.title = "Persistent Settings";
+    persistentSettingsMenu.parent = &settingsMenu;
+    persistentSettingsMenu.items = persistentSettingsMenuItems;
+    persistentSettingsMenu.itemCount = sizeof(persistentSettingsMenuItems) / sizeof(persistentSettingsMenuItems[0]);
 
     mainMenu.title = "";
     mainMenu.parent = nullptr;

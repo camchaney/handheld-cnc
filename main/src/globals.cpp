@@ -56,7 +56,9 @@ bool debuggingOn = false;			// print debug statements
 bool stopwatchOn = false;
 bool outputSerialOn = false;				// output data to serial
 bool outputSDOn = true;				// output data to SD card
-bool autoZeroXY = true;
+
+// Persistent settings
+Settings settings;
 
 // gCode parameters
 bool drawGCode = false;			// draw gCode, do not penetrate paper
