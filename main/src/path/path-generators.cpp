@@ -104,8 +104,8 @@ void circleGenerator() {
 		float zVal = (i == num_points - 1 || i == 1) ? restHeight : -deepth;
 		
 		path.points[i] = Point{
-			x: center.x + r*cosf(theta - PI/2) + xOffset,
-			y: center.y + r*sinf(theta - PI/2) + yOffset,
+			x: center.x + r*cosf(theta - PI/2),
+			y: center.y + r*sinf(theta - PI/2),
 			z: zVal,
 			feature: NORMAL
 		};
