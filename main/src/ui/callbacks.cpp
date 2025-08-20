@@ -10,7 +10,6 @@ void onStartDummy(void* ctx) {
 }
 
 void onCuttingMenuBack(void* ctx) {
-	handleButtons.enable(false);
 	ui.showCompass(true);
 }
 
@@ -34,14 +33,6 @@ void onDoubleClickCompassUI(EncoderButton &eb) {
 
 void onEncoderCompassUI(EncoderButton &eb) {
 	ui.adjust(eb.increment());
-}
-
-void onLeftClickCompassUI(HandleButtons &btn) {
-	ui.back();
-}
-
-void onRightClickCompassUI(HandleButtons &btn) {
-	ui.enter();
 }
 
 void onStartSelectFile(void* ctx) {
@@ -90,7 +81,6 @@ void startCutting() {
 
 	state = READY;
 	cutState = NOT_CUT_READY;
-	handleButtons.enable(false);
 	ui.showCompass(true);
 	
 	// Clear out sensors in case we moved while in design mode

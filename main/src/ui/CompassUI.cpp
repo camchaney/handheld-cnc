@@ -224,7 +224,7 @@ void CompassUI::renderEditScreen(MenuRoot& root) {
         case MenuItemType::Submenu:
             break;
     }
-    drawCenteredText(text2send, 2, WHITE);
+    drawCenteredText(text2send, 2);
 }
 
 void CompassUI::renderMenuScreen(MenuRoot& root) {
@@ -389,7 +389,7 @@ void CompassUI::drawPresetMenuItem(MenuItem* item) {
             break;
         case '6':
             // square with Make
-            drawCenteredText("M:", 2, WHITE);
+            drawCenteredText("M:", 2);
             screen->drawLine(_centerX-size, _centerY, _centerX, _centerY+size, WHITE);
             screen->drawLine(_centerX, _centerY+size, _centerX+size, _centerY, WHITE);
             screen->drawLine(_centerX+size, _centerY, _centerX, _centerY-size, WHITE);

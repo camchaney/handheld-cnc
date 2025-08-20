@@ -4,7 +4,6 @@
 #include "globals.h"
 #include "actuation/motors.h"
 #include "sensors/sensors.h"
-#include "ui/display.h"
 #include "ui/encoder.h"
 #include "path/path-generators.h"
 #include "path/path-execution.h"
@@ -21,7 +20,7 @@ void setup() {
 
 	screen->fillScreen(BLACK);
 
-	drawCenteredText("Initializing...", 2);
+	ui.drawCenteredText("Initializing...", 2);
 	delay(200);
 
 	Serial.println("Loading calibration coefficients:");
@@ -50,7 +49,7 @@ void setup() {
 		Serial.println("Initialization done.");
 	}
 
-	drawCenteredText("Zero Machine XY", 2);
+	ui.drawCenteredText("Zero Machine XY", 2);
 	encoder.setClickHandler(onClickZeroMachineXY);
 }
 

@@ -56,9 +56,6 @@ bool debuggingOn = false;			// print debug statements
 bool stopwatchOn = false;
 bool outputSerialOn = false;				// output data to serial
 bool outputSDOn = true;				// output data to SD card
-int designOrCalibrate = 0;			// choose design or calibrate (0 or 1)
-int acceptCal = 0;					// accept calibration or not
-int pauseSelection = 0;					// pause menu selection
 bool autoZeroXY = true;
 
 // gCode parameters

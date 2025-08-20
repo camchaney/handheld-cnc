@@ -9,7 +9,6 @@
 #include "planner.h"
 #include "../math/geometry.h"
 #include "../io/logging.h"
-#include "../ui/display.h"
 #include "../ui/encoder.h"
 #include "../actuation/actuator.h"
 

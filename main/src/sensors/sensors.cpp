@@ -303,9 +303,9 @@ void calibrate() {
 	for (int axis = 0; axis < 2; axis++) {
 		while (currentRun < numRuns) {
 			if (axis == 0) {
-				drawCenteredText("Align X axis\nClick when at 0", 2);
+				ui.drawCenteredText("Align X axis\nClick when at 0", 2);
 			} else {
-				drawCenteredText("Align Y axis\nClick when at 0", 2);
+				ui.drawCenteredText("Align Y axis\nClick when at 0", 2);
 			}
 			// draw circular progress bar based on run number
 			int progressRadius = (screen->width()/2) - 10;
@@ -337,9 +337,9 @@ void calibrate() {
 			//		- "Reached 300?"
 			// 		- "Retry?"
 			if (axis == 0) {
-				drawCenteredText("Move in +X\nClick when at 300mm", 2);
+				ui.drawCenteredText("Move in +X\nClick when at 300mm", 2);
 			} else {
-				drawCenteredText("Move in +Y\nClick when at 300mm", 2);
+				ui.drawCenteredText("Move in +Y\nClick when at 300mm", 2);
 			}
 
 			while (state != CALIBRATION_ADVANCE) {

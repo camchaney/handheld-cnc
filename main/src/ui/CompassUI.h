@@ -31,7 +31,7 @@ public:
     MenuRoot& getCurrentRoot();
     void updateCompass(Position desPosition, float progress);
     static void render(MenuRoot& root, bool forceRedraw = false);
-    static void drawCenteredText(const char* text, int size, uint16_t fgColor);
+    static void drawCenteredText(const char* text, int size, uint16_t fgColor = WHITE);
     DisplayState displayState;
 
 private:

@@ -65,9 +65,6 @@ extern bool debuggingOn;
 extern bool stopwatchOn;
 extern bool outputSerialOn;
 extern bool outputSDOn;
-extern int designOrCalibrate;
-extern int acceptCal;
-extern int pauseSelection;
 extern char selectedDesignPreset;
 extern bool autoZeroXY;
 
