@@ -7,7 +7,8 @@ MenuRoot mainMenuRoot;
 
 Menu mainMenu;
 Menu circleMenu;
-Menu squareMenu;
+Menu rectangleMenu;
+Menu lineMenu;
 Menu generalPresetMenu;
 Menu cutDesignMenu;
 Menu presetMenu;
@@ -26,13 +27,23 @@ MenuItem circleItems[] = {
 };
 
 MenuItem squareItems[] = {
-    makeAction("Cut!", onStartPresetCut, &squareMenu),
+    makeAction("Cut!", onStartPresetCut, &rectangleMenu),
     makeFloat("Length", &length, 0, 10000, 0.1, "mm"),
     makeFloat("Width", &width, 0, 10000, 0.1, "mm"),
     makeFloat("Deepth", &deepth, 0, 50, 0.1, "mm"),
     makeFloat("X Offset", &xOffset, -10000, 10000, 0.1, "mm"),
     makeFloat("Y Offset", &yOffset, -10000, 10000, 0.1, "mm"),
     makeFloat("Rotation", &rotation, 0, 360, 0.1, "deg"),
+    makeBack(),
+};
+
+MenuItem lineItems[] = {
+    makeAction("Cut!", onStartPresetCut, &lineMenu),
+    makeFloat("Deepth", &deepth, 0, 50, 0.1, "mm"),
+    makeFloat("Length", &length, 0, 10000, 0.1, "mm"),
+    makeFloat("Rotation", &rotation, 0, 360, 0.1, "deg"),
+    makeFloat("X Offset", &xOffset, -10000, 10000, 0.1, "mm"),
+    makeFloat("Y Offset", &yOffset, -10000, 10000, 0.1, "mm"),
     makeBack(),
 };
 
@@ -60,8 +71,8 @@ MenuItem speedRunMenuItems[] = {
 
 MenuItem presetItems[] = {
     makeSubmenu("7", &circleMenu),
-    makeSubmenu("4", &squareMenu),
-    makeSubmenu("0", &generalPresetMenu),
+    makeSubmenu("4", &rectangleMenu),
+    makeSubmenu("0", &lineMenu),
     makeSubmenu("1", &generalPresetMenu),
     makeSubmenu("2", &generalPresetMenu),
     makeSubmenu("3", &generalPresetMenu),
@@ -105,11 +116,17 @@ void buildMenus(MenuDrawCallback drawCallback) {
     circleMenu.itemCount = sizeof(circleItems) / sizeof(circleItems[0]);
     circleMenu.renderType = MenuItemRenderType::WithValue;
 
-    squareMenu.title = "Square";
-    squareMenu.parent = &presetMenu;
-    squareMenu.items = squareItems;
-    squareMenu.itemCount = sizeof(squareItems) / sizeof(squareItems[0]);
-    squareMenu.renderType = MenuItemRenderType::WithValue;
+    rectangleMenu.title = "Square";
+    rectangleMenu.parent = &presetMenu;
+    rectangleMenu.items = squareItems;
+    rectangleMenu.itemCount = sizeof(squareItems) / sizeof(squareItems[0]);
+    rectangleMenu.renderType = MenuItemRenderType::WithValue;
+
+    lineMenu.title = "Line";
+    lineMenu.parent = &presetMenu;
+    lineMenu.items = lineItems;
+    lineMenu.itemCount = sizeof(lineItems) / sizeof(lineItems[0]);
+    lineMenu.renderType = MenuItemRenderType::WithValue;
 
     generalPresetMenu.title = "General Preset";
     generalPresetMenu.parent = &presetMenu;
