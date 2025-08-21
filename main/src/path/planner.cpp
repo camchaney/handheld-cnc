@@ -2,7 +2,7 @@
 
 // Load gCode path (pre-processed into a vector of GCodePoints)
 void TrajectoryGenerator::resetPath(Point& goal) {
-	goal = Point{0.0, 0.0, 0.0};
+	goal = Point{0.0, 0.0, restHeight};
 	segmentTime = 0.0;
 	currentTime = 0.0;
 	current_point_idx = 0;
