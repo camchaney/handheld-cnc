@@ -94,18 +94,17 @@ void doubleLineGenerator() {
 
 void circleGenerator() {
 	int num_points = 4000;
-	float r = radius;
-	Point center = Point{x: 0.0f + xOffset, y: r + yOffset, z: -deepth};
+	Point center = Point{x: xOffset, y: yOffset, z: -deepth};
 
-	path.points[0] = Point{x: 0.0f + xOffset, y: 0.0f + yOffset, z: restHeight};
+	path.points[0] = Point{x: xOffset, y: yOffset - radius, z: restHeight};
 
 	for (int i = 1; i < num_points; i++) {
-		float theta = (float)i/(num_points-1)*(2*PI);
+		float theta = (float)i / (num_points - 1) * (2 * PI);
 		float zVal = (i == num_points - 1 || i == 1) ? restHeight : -deepth;
 		
 		path.points[i] = Point{
-			x: center.x + r*cosf(theta - PI/2),
-			y: center.y + r*sinf(theta - PI/2),
+			x: center.x + radius * cosf(theta - PI/2),
+			y: center.y + radius * sinf(theta - PI/2),
 			z: zVal,
 			feature: NORMAL
 		};
