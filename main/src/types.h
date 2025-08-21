@@ -133,7 +133,6 @@ typedef struct Path {
 	// TODO: add other properties such as angle, etc. (more info in notebook)
 	Point points[MAX_POINTS] = {NAN};
 	int numPoints = MAX_POINTS;
-	float minZ = 0.0f;
 } Path;
 
 #endif
