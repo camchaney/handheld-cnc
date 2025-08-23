@@ -72,7 +72,7 @@ void onClickAcceptAutoTouchE(EncoderButton &eb) {
 	onClickAcceptAutoTouch();
 }
 
-void onClickAcceptAutoTouchH(HandleButtons &eb) {
+void onClickAcceptAutoTouchH(HandleButtons &btn) {
 	onClickAcceptAutoTouch();
 }
 
