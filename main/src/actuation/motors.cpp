@@ -305,8 +305,8 @@ void autoTouchWorkspaceZ() {
 }
 
 void acceptAutoTouchWorkspaceZ() {
+	maxHeight = (zStepCount * 1.0f / ConvLead) - autoTouchRetraction;
 	stepperZ.setCurrentPosition(0);
-	maxHeight = stepperZ.currentPosition()*1.0f / ConvLead;
 
 	stepperZ.setMaxSpeed(maxSpeedZ/2);
 	stepperZ.moveTo(restHeight * ConvLead);
