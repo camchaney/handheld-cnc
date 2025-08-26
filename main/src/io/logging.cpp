@@ -221,10 +221,6 @@ void parseGCodeFile(const String& sFilename) {
 				case 'Z':
 					newPoint.z = atof(ptr + 1);
 					hasNewCoordinate = true;
-					if (newPoint.z < activePath->minZ) {
-						activePath->minZ = newPoint.z;			// TODO: maybe not necessary
-						// Serial.printf("Minimum z = %f", activePath->minZ);
-					}
 					if (newPoint.z > 4.0) {
 						// TODO: this is bandaid for shitty gcode! Remove this
 						newPoint.z = 4.0;
