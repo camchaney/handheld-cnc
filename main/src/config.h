@@ -105,4 +105,10 @@ const long unsigned dtOutputSD = 10;			// time interval for auxiliary SD logging
 const long unsigned dt = 900;					// length of sensor timestep (us)(freq = 1,000,000/timestepPoll [Hz])
 const long unsigned dtControl = 500;			// length of control timestep (us)(freq = 1,000,000/timestepControl [Hz])
 
+// Auto Touch constants
+const float maxAutoTouchCurrent_RMS = 300.0;			// motor RMS current rating (mA)
+const long unsigned autoTouchStepInterval = 600;	    // step interval for auto touch (us)
+const short unsigned autoTouchThreshold = 50;           // auto touch threshold (SG value)
+const float autoTouchRetraction = 1.4f;                 // auto touch retraction (to compensate flex coupler play)
+
 #endif
