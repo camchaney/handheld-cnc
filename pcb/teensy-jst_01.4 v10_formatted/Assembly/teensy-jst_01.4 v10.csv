@@ -8,7 +8,7 @@ Qty,Value,Device,Package,Parts,Description,AVAILABILITY,CATEGORY,CHECK_PRICES,CO
 1,100k,R-US_CHIP-0402(1005-METRIC),RESC1005X40,R23,"Resistor Fixed - ANSI",,Resistor,,,,,,,,,,,,,,,,,,,,,,Fixed,,,,,
 5,100nF,C_CHIP-0402(1005-METRIC),CAPC1005X60,"C9, C14, C15, C16, C17","Capacitor - Generic",,Capacitor,,,,,,,,,,,,,,,,,,,,,,,,,,,
 3,100nF,C_CHIP-0603(1608-METRIC),CAPC1608X85,"C3, C4, C28","Capacitor - Generic",,Capacitor,,,,,,,,,,,,,,,,,,,,,,,,,,,
-10,100pF,C_CHIP-0402(1005-METRIC),CAPC1005X60,"C18, C19, C20, C21, C22, C23, C24, C25, C26, C27","Capacitor - Generic",,Capacitor,,,,,,,,,,,,,,,,,,,,,,,,,,,
+10,0pF,C_CHIP-0402(1005-METRIC),CAPC1005X60,"C18, C19, C20, C21, C22, C23, C24, C25, C26, C27","Capacitor - Generic DNS",,Capacitor,,,,,,,,,,,,,,,,,,,,,,,,,,,
 4,100uF/50V,CPOL-USD,PANASONIC_D,"C1, C2, C12, C13","POLARIZED CAPACITOR, American symbol",,,,,,,,,,,,,,,7,,,,,,,,C,,,,,,
 11,10k,R-US_CHIP-0603(1608-METRIC),RESC1608X60,"R1, R2, R6, R7, R9, R10, R11, R12, R13, R14, R27","Resistor Fixed - ANSI",,Resistor,,,,,,,,,,,,,,,,,,,,,,Fixed,,,,,
 1,10uH,L-USMWSA0503S-100MT,MWSA0503S-100MT,L1,"INDUCTOR, American symbol",,,,,,,,,,,,,,,,,,,,,,,,,,,,,
