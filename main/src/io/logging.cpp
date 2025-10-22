@@ -1,6 +1,9 @@
 #include "logging.h"
 
+// File info
 char filename[MAX_STRING_LENGTH];
+String fullPath;
+int currentLineNum = 0;
 
 // Timing variables
 static long unsigned timeLastOutput = 0;
@@ -139,10 +142,14 @@ bool validCoordinate(const char* gLine) {
 }
 
 void parseGCodeFile(const String& sFilename) {
+	// For live gCode parsing, this function will only read the file at the start
+	// 	and store key parameters:
+	//		- numPoints
+	//		- minZ
+	
 	// Update filename variable (for logging purposes only)
 	snprintf(filename, MAX_STRING_LENGTH, "%s", sFilename.c_str());
 	// Construct full path by combining current path and filename
-	String fullPath;
 	if (currentPath == "/") {
 		fullPath = String("/") + sFilename;
 	} else {
@@ -159,8 +166,6 @@ void parseGCodeFile(const String& sFilename) {
 	Serial.printf("Opened file: %s\n", filePath);
 
 	// Reset path
-	// TODO: make the feature part of the point object instead of the path object
-	// path.feature = NORMAL;
 	path.numPoints = 0;
 	
 	// Reset all points in the path
@@ -263,6 +268,129 @@ void parseGCodeFile(const String& sFilename) {
 	}
 
 	file.close();
+}
+
+void updatePathBuffer() {
+	// TODO: make this a part of the Path class
+	// open SD card
+	// read current_line + 1 until BUFFER_SIZE points have been read or end of file
+	// store points in pathBuffer
+	
+	const char* filePath = fullPath.c_str();
+	char line[LINE_BUFFER_SIZE];
+	Path* activePath = &path;
+	bool activeFeature = false;
+	Point lastPoint = {0};
+	int rel_point_idx = 0;
+
+	FsFile file;
+	if (!file.open(filePath, O_READ)) {
+		Serial.printf("Failed to open file: %s\n", filePath);
+		return;
+	}
+
+	// Clear pathBuffer
+	for (int j = 0; j < BUFFER_SIZE; j++) {
+		pathBuffer.points[j] = {NAN};
+	}
+	
+	// TODO: optimize buffer forming
+	// Go through each line until buffer is filled
+	while (rel_point_idx < BUFFER_SIZE && file.fgets(line, sizeof(line))) {
+		bool hasNewCoordinate = false;
+
+		// Skip all the nonsense
+		if (validCommand(line)) {
+			activeFeature = true;
+		} else if (!validCoordinate(line)){
+			// once (X,Y,Z) coordinates have stopped being sent, the command is over
+			activeFeature = false;
+		}
+
+		// Look for G moves
+		if (activeFeature) {
+			Point newPoint = lastPoint;
+			char* ptr = line;
+			
+			// Parse X, Y, Z coordinates from line
+			// TODO: needs some work
+			while (*ptr) {
+				switch (*ptr) {
+				case 'G':
+					// TODO: make this cleaner and more universal
+					// TODO: handle G28 call to home device
+					if (atof(ptr+1) == 98) newPoint.feature = DRILL;
+					else if (atof(ptr+1) == 0) newPoint.feature = NORMAL;
+					else if (atof(ptr+1) == 1) newPoint.feature = NORMAL;
+					else if (atof(ptr+1) == 80) newPoint.feature = NORMAL; 		// G80 cancels current command (used in drill cycle)
+					break;
+				case 'X':
+					newPoint.x = atof(ptr + 1);
+					hasNewCoordinate = true;
+					break;
+				case 'Y':
+					newPoint.y = atof(ptr + 1);
+					hasNewCoordinate = true;
+					break;
+				case 'Z':
+					newPoint.z = atof(ptr + 1);
+					hasNewCoordinate = true;
+					if (newPoint.z < activePath->minZ) {
+						activePath->minZ = newPoint.z;			// TODO: maybe not necessary
+						// Serial.printf("Minimum z = %f", activePath->minZ);
+					}
+					if (newPoint.z > 4.0) {
+						// TODO: this is bandaid for shitty gcode! Remove this
+						newPoint.z = 4.0;
+					}
+					break;
+				// TODO: parse feedrate (F) and, for holes, retract height (R)
+				// case 'F':
+				// 	newPoint.f = atof(ptr + 1);
+				// 	break;
+				// case 'R':
+				}
+				newPoint.f = feedrate_default;
+				ptr++;
+			}
+
+			// Add point to current path if there's space
+			if (hasNewCoordinate && activePath->numPoints < MAX_POINTS) {
+				if (newPoint.feature != DRILL) {
+					// Add a normal point
+					activePath->points[activePath->numPoints] = newPoint;
+					activePath->numPoints++;
+					// Serial.printf("Point: X(%f), Y(%f), Z(%f)\n", newPoint.x, newPoint.y, newPoint.z);
+				} else if (activePath->numPoints + 2 < MAX_POINTS){
+					// Make a drill cycle
+					// TODO: make this cleaner and more universal for drill cycles
+					float zVals[3] = {restHeight, newPoint.z, restHeight};
+					for (int i = 0; i < 3; i++) {
+						activePath->points[activePath->numPoints] = newPoint;
+						activePath->points[activePath->numPoints].z = zVals[i];
+						activePath->numPoints++;
+						// Serial.printf("Point: X(%f), Y(%f), Z(%f)\n", newPoint.x, newPoint.y, zVals[i]);
+					}
+				} else {
+					Serial.println("Path is full!");
+					break;
+				}
+			} else if (activePath->numPoints >= MAX_POINTS) {
+				Serial.println("Path is full!");
+				break;
+			}
+
+			lastPoint = newPoint;
+		}
+	}
+
+
+}
+
+void parseGCodeLine(const String& sFilename, const) {
+	// TODO: do this with a buffer so that it can be used with interrupts and lookahead acceleration profiles
+	// This function will parse a single line of gCode and add it to the path
+
 }
 
 // Write to Serial ------------------------------------------------------

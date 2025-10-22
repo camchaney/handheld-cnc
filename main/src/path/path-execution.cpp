@@ -43,6 +43,12 @@ void handleChickenHead() {
 }
 
 void handleCutting(long deltaTime) {
+	// Update path buffer
+	if (bufferTimer >= dtBuffer) {
+		bufferTimer = 0;
+		trajectory.updateBuffer(deltaTime, goal);
+	}
+
 	// Start of cutting Logic
 	trajectory.update(deltaTime, goal);			// update goal point
 	if (matThickness == 0.0 && designType == FROM_FILE && goal.z < 0.0) {

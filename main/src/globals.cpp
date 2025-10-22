@@ -22,6 +22,7 @@ DesignType designType = PRESET;
 
 // Path data
 Path path;
+Path pathBuffer;
 int current_point_idx = 0;
 
 // SD Stuff
@@ -78,4 +79,5 @@ long unsigned sensingTime = 0;
 elapsedMicros runTimer;
 elapsedMicros filemicros;
 elapsedMillis speedRunTimer;
+elapsedMillis bufferTimer;
 uint8_t iter = 0;

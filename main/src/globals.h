@@ -33,6 +33,7 @@ extern DesignType designType;
 
 // Path data
 extern Path path;
+extern Path pathBuffer;
 extern int current_point_idx;
 
 // SD stuff
@@ -88,6 +89,7 @@ extern long unsigned sensingTime;
 extern elapsedMicros runTimer;
 extern elapsedMicros filemicros;
 extern elapsedMillis speedRunTimer;
+extern elapsedMillis bufferTimer;
 extern uint8_t iter;
 
 #endif

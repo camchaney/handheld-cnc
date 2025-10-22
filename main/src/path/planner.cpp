@@ -2,6 +2,7 @@
 
 // Load gCode path (pre-processed into a vector of GCodePoints)
 void TrajectoryGenerator::resetPath(Point& goal) {
+	// TODO: make this a part of the Path class
 	goal = Point{0.0, 0.0, 0.0};
 	segmentTime = 0.0;
 	currentTime = 0.0;
@@ -14,6 +15,8 @@ void TrajectoryGenerator::update(long deltaTime, Point& goal) {
 	// TODO: check if path is finished
 	// if (path.empty()) return;
 
+	// TODO: check if buffer has finished. If so, update buffer
+
 	if (running) {
 		currentTime += float(deltaTime) / float(1'000'000);		// convert to seconds
 
@@ -22,6 +25,7 @@ void TrajectoryGenerator::update(long deltaTime, Point& goal) {
 			// TODO: careful of infinite loops. Is this a problem?
 			// TODO: handle the case where feedrate would result in a greater-than-max motor speed
 			//	- simpler case would be to just compare feedrate to max actuation speed (combined, not single motor speed)
+			//	- can I just use distanceToGo() here? Only advance when distanceToGo() is 0?
 
 			float f = path.points[current_point_idx].f * feedrateBoost;
 	

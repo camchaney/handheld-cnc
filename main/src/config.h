@@ -41,6 +41,7 @@
 // Constants
 // #define MAX_PATHS  			10
 #define MAX_POINTS 			8000
+#define BUFFER_SIZE	 		16
 #define MAX_FILES			100
 #define GC9A01A_WEBWORK_GREEN 0x8FF1
 
@@ -104,5 +105,6 @@ const long unsigned dtOutput = 20;				// (ms)
 const long unsigned dtOutputSD = 10;			// time interval for auxiliary SD logging (ms)
 const long unsigned dt = 900;					// length of sensor timestep (us)(freq = 1,000,000/timestepPoll [Hz])
 const long unsigned dtControl = 500;			// length of control timestep (us)(freq = 1,000,000/timestepControl [Hz])
+const long unsigned dtBuffer = 100;				// length of path buffer update interval (ms)
 
 #endif

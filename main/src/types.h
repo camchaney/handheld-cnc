@@ -121,6 +121,7 @@ typedef struct CalParams {
 
 // Coordinate
 typedef struct Point {
+	// int i;					// index in path
 	float x;				// target position (mm)
 	float y;				// target position (mm)
 	float z;				// target position (mm)
