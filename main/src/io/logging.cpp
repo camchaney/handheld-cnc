@@ -112,9 +112,9 @@ void handleSpeedRun() {
 bool validCommand(const char* gLine) {
 	// Returns true if the line contains a valid GCode command
 
-	int numCommands = 3;
-	const char* validCommands[numCommands] = {"G0", "G1", "G98"};
-	int commandSizes[numCommands] = {2,2,3};
+	int numCommands = 5;
+	const char* validCommands[numCommands] = {"G0", "G00", "G1", "G01", "G98"};
+	int commandSizes[numCommands] = {2,3,2,3,3};
 
 	for (int i = 0; i < numCommands; i++) {
 		if (strncmp(gLine, validCommands[i], commandSizes[i]) == 0) {
@@ -202,6 +202,7 @@ void parseGCodeFile(const String& sFilename) {
 				case 'G':
 					// TODO: make this cleaner and more universal
 					// TODO: handle G28 call to home device
+					// TODO: handle "G00" and "G01" as well
 					if (atof(ptr+1) == 98) newPoint.feature = DRILL;
 					else if (atof(ptr+1) == 0) newPoint.feature = NORMAL;
 					else if (atof(ptr+1) == 1) newPoint.feature = NORMAL;
@@ -219,13 +220,14 @@ void parseGCodeFile(const String& sFilename) {
 					newPoint.z = atof(ptr + 1);
 					hasNewCoordinate = true;
 					if (newPoint.z < activePath->minZ) {
-						activePath->minZ = newPoint.z;			// TODO: maybe not necessary
-						// Serial.printf("Minimum z = %f", activePath->minZ);
+						activePath->minZ = newPoint.z;			// TODO: maybe not necessary (unused right now)
 					}
 					if (newPoint.z > 4.0) {
 						// TODO: this is bandaid for shitty gcode! Remove this
 						newPoint.z = 4.0;
 					}
+					// if matThickness is set to 0 (drawing), then don't pierce!
+					if (matThickness == 0.0 && designType == FROM_FILE && newPoint.z < 0.0) newPoint.z = 0.0f;
 					break;
 				// TODO: parse feedrate (F) and, for holes, retract height (R)
 				// case 'F':

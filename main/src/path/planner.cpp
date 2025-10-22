@@ -28,6 +28,7 @@ void TrajectoryGenerator::update(long deltaTime, Point& goal) {
 			//	- can I just use distanceToGo() here? Only advance when distanceToGo() is 0?
 
 			float f = path.points[current_point_idx].f * feedrateBoost;
+			// TODO: known bug where interpolation gets skipped if feedrateBoost is changed mid-path
 	
 			float segmentDistance = sqrt(
 				pow(path.points[current_point_idx + 1].x - path.points[current_point_idx].x, 2) +

@@ -134,10 +134,10 @@ void drawShape() {
 			break;
 		case 4:
 			// diamond
-			screen->drawLine(centerX-size, centerY, centerX, centerY+size, WHITE);
-			screen->drawLine(centerX, centerY+size, centerX+size, centerY, WHITE);
-			screen->drawLine(centerX+size, centerY, centerX, centerY-size, WHITE);
-			screen->drawLine(centerX, centerY-size, centerX-size, centerY, WHITE);
+			screen->drawLine(centerX-size/2, centerY, centerX, centerY+size, WHITE);
+			screen->drawLine(centerX, centerY+size, centerX+size/2, centerY, WHITE);
+			screen->drawLine(centerX+size/2, centerY, centerX, centerY-size, WHITE);
+			screen->drawLine(centerX, centerY-size, centerX-size/2, centerY, WHITE);
 			break;
 		case 5:
 			// square w/ squiggly

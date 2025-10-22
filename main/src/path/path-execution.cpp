@@ -51,10 +51,6 @@ void handleCutting(long deltaTime) {
 
 	// Start of cutting Logic
 	trajectory.update(deltaTime, goal);			// update goal point
-	if (matThickness == 0.0 && designType == FROM_FILE && goal.z < 0.0) {
-		// if matThickness is set to 0 (drawing), then don't pierce!
-		goal.z = goal.z - path.minZ;
-	}
 
 	// Update the desired position (local actuator frame)
 	actuator.update(deltaTime, goal, pose);	

@@ -96,8 +96,10 @@ void doSensing() {
 		
 		// TODO: find better way to check for bad readings. surfaceQuality does not seem to be reliable
 		if (onSurface[i]) {
-			measVel[0][i] = cal[i].x * (dx*cosf(cal[i].r) - dy*sinf(cal[i].r)) / sensingTime;
-			measVel[1][i] = cal[i].y * (dx*sinf(cal[i].r) + dy*cosf(cal[i].r)) / sensingTime;
+			float sinfr = sinf(cal[i].r);
+			float cosfr = cosf(cal[i].r);
+			measVel[0][i] = cal[i].x * (dx*cosfr - dy*sinfr) / sensingTime;
+			measVel[1][i] = cal[i].y * (dx*sinfr + dy*cosfr) / sensingTime;
 		} else {
 			// TODO: why are we evaluating the sensor validity below instead of here?
 			measVel[0][i] = NAN;
@@ -146,14 +148,16 @@ void doSensing() {
 
 	// Body position estimation
 	// TODO: turn this into "matrix" math
-	estVel[0][0] = measVel[0][0]*cosf(pose.yaw)-measVel[1][0]*sinf(pose.yaw) + 0.5*estAngVel1*(lx*cosf(pose.yaw)-(ly)*sinf(pose.yaw));
-	estVel[0][1] = measVel[0][1]*cosf(pose.yaw)-measVel[1][1]*sinf(pose.yaw) + 0.5*estAngVel1*(lx*cosf(pose.yaw)+(ly)*sinf(pose.yaw));
-	estVel[0][2] = measVel[0][2]*cosf(pose.yaw)-measVel[1][2]*sinf(pose.yaw) + 0.5*estAngVel1*(-lx*cosf(pose.yaw)-(ly)*sinf(pose.yaw));
-	estVel[0][3] = measVel[0][3]*cosf(pose.yaw)-measVel[1][3]*sinf(pose.yaw) + 0.5*estAngVel1*(-lx*cosf(pose.yaw)+(ly)*sinf(pose.yaw));
-	estVel[1][0] = measVel[0][0]*sinf(pose.yaw)+measVel[1][0]*cosf(pose.yaw) + 0.5*estAngVel1*((ly)*cosf(pose.yaw)+lx*sinf(pose.yaw));
-	estVel[1][1] = measVel[0][1]*sinf(pose.yaw)+measVel[1][1]*cosf(pose.yaw) + 0.5*estAngVel1*(-(ly)*cosf(pose.yaw)+lx*sinf(pose.yaw));
-	estVel[1][2] = measVel[0][2]*sinf(pose.yaw)+measVel[1][2]*cosf(pose.yaw) + 0.5*estAngVel1*((ly)*cosf(pose.yaw)-lx*sinf(pose.yaw));
-	estVel[1][3] = measVel[0][3]*sinf(pose.yaw)+measVel[1][3]*cosf(pose.yaw) + 0.5*estAngVel1*(-(ly)*cosf(pose.yaw)-lx*sinf(pose.yaw));
+	float sinfy = sinf(pose.yaw);
+	float cosfy = cosf(pose.yaw);
+	estVel[0][0] = measVel[0][0]*cosfy-measVel[1][0]*sinfy + 0.5*estAngVel1*(lx*cosfy-(ly)*sinfy);
+	estVel[0][1] = measVel[0][1]*cosfy-measVel[1][1]*sinfy + 0.5*estAngVel1*(lx*cosfy+(ly)*sinfy);
+	estVel[0][2] = measVel[0][2]*cosfy-measVel[1][2]*sinfy + 0.5*estAngVel1*(-lx*cosfy-(ly)*sinfy);
+	estVel[0][3] = measVel[0][3]*cosfy-measVel[1][3]*sinfy + 0.5*estAngVel1*(-lx*cosfy+(ly)*sinfy);
+	estVel[1][0] = measVel[0][0]*sinfy+measVel[1][0]*cosfy + 0.5*estAngVel1*((ly)*cosfy+lx*sinfy);
+	estVel[1][1] = measVel[0][1]*sinfy+measVel[1][1]*cosfy + 0.5*estAngVel1*(-(ly)*cosfy+lx*sinfy);
+	estVel[1][2] = measVel[0][2]*sinfy+measVel[1][2]*cosfy + 0.5*estAngVel1*((ly)*cosfy-lx*sinfy);
+	estVel[1][3] = measVel[0][3]*sinfy+measVel[1][3]*cosfy + 0.5*estAngVel1*(-(ly)*cosfy-lx*sinfy);
 
 	// Simple average of linear velocities
 	float sumVelX = 0.0f;
