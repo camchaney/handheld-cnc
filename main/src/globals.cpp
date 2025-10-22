@@ -21,8 +21,9 @@ bool valid_sensors = true;
 DesignType designType = PRESET;
 
 // Path data
-Path path;
-Path pathBuffer;
+PathInfo pathInfo;
+PathBuffer pathBuffer;
+uint32_t currentFilePosition = 0;
 int current_point_idx = 0;
 
 // SD Stuff

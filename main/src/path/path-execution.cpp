@@ -46,7 +46,11 @@ void handleCutting(long deltaTime) {
 	// Update path buffer
 	if (bufferTimer >= dtBuffer) {
 		bufferTimer = 0;
-		trajectory.updateBuffer(deltaTime, goal);
+		if (designType == PRESET) {
+			updatePresetPathBuffer();
+		} else {
+			updatePathBuffer();
+		}
 	}
 
 	// Start of cutting Logic
@@ -118,7 +122,7 @@ void handleCutting(long deltaTime) {
 	}
 
 	// Update UI
-	updateUI(desPos, (float)current_point_idx/(float)path.numPoints);
+	updateUI(desPos, (float)current_point_idx/(float)pathInfo.numPoints);
 
 	// Path logging
 	// TODO: make this more clean (without pass by reference)

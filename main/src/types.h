@@ -130,11 +130,19 @@ typedef struct Point {
 } Point;
 
 // Path
-typedef struct Path {
-	// TODO: add other properties such as angle, etc. (more info in notebook)
-	Point points[MAX_POINTS] = {NAN};
-	int numPoints = MAX_POINTS;
+typedef struct PathInfo {
+	char filename[MAX_STRING_LENGTH];
+	int numPoints;
 	float minZ = 0.0f;
 } Path;
+
+// Buffer
+// TODO: make this a class with methods for:
+// - resetting
+// - updating with new points
+typedef struct PathBuffer {
+	Point points[PATH_BUFFER_SIZE] = {NAN};
+	int first_point_idx = 0;
+} PathBuffer;
 
 #endif

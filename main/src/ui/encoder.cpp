@@ -1,7 +1,7 @@
 #include "encoder.h"
 
 // #define NUM_DESIGNS 		9
-#define NUM_DESIGNS 		8
+#define NUM_DESIGNS 		7
 
 
 void nullHandler(EncoderButton &eb) {

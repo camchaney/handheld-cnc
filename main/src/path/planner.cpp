@@ -21,19 +21,19 @@ void TrajectoryGenerator::update(long deltaTime, Point& goal) {
 		currentTime += float(deltaTime) / float(1'000'000);		// convert to seconds
 
 		// Find the segment we're in
-		while (current_point_idx < path.numPoints - 1) {
+		while (current_point_idx < pathInfo.numPoints - 1) {
 			// TODO: careful of infinite loops. Is this a problem?
 			// TODO: handle the case where feedrate would result in a greater-than-max motor speed
 			//	- simpler case would be to just compare feedrate to max actuation speed (combined, not single motor speed)
 			//	- can I just use distanceToGo() here? Only advance when distanceToGo() is 0?
-
-			float f = path.points[current_point_idx].f * feedrateBoost;
+			int rel_idx = current_point_idx - pathBuffer.first_point_idx;
+			float f = pathBuffer.points[rel_idx].f * feedrateBoost;
 			// TODO: known bug where interpolation gets skipped if feedrateBoost is changed mid-path
 	
 			float segmentDistance = sqrt(
-				pow(path.points[current_point_idx + 1].x - path.points[current_point_idx].x, 2) +
-				pow(path.points[current_point_idx + 1].y - path.points[current_point_idx].y, 2) +
-				pow(path.points[current_point_idx + 1].z - path.points[current_point_idx].z, 2)
+				pow(pathBuffer.points[rel_idx + 1].x - pathBuffer.points[rel_idx].x, 2) +
+				pow(pathBuffer.points[rel_idx + 1].y - pathBuffer.points[rel_idx].y, 2) +
+				pow(pathBuffer.points[rel_idx + 1].z - pathBuffer.points[rel_idx].z, 2)
 			);
 			if (segmentDistance == 0.0) {
 				// Serial.println("Segment distance is zero");
@@ -48,9 +48,9 @@ void TrajectoryGenerator::update(long deltaTime, Point& goal) {
 				// Linear interpolation within the segment
 				// TODO: handle arc movements
 				float t = currentTime / segmentTime;
-				goal.x = path.points[current_point_idx].x + t * (path.points[current_point_idx + 1].x - path.points[current_point_idx].x);
-				goal.y = path.points[current_point_idx].y + t * (path.points[current_point_idx + 1].y - path.points[current_point_idx].y);
-				goal.z = path.points[current_point_idx].z + t * (path.points[current_point_idx + 1].z - path.points[current_point_idx].z);
+				goal.x = pathBuffer.points[rel_idx].x + t * (pathBuffer.points[rel_idx + 1].x - pathBuffer.points[rel_idx].x);
+				goal.y = pathBuffer.points[rel_idx].y + t * (pathBuffer.points[rel_idx + 1].y - pathBuffer.points[rel_idx].y);
+				goal.z = pathBuffer.points[rel_idx].z + t * (pathBuffer.points[rel_idx + 1].z - pathBuffer.points[rel_idx].z);
 				// TODO: add feedrate and feature type to goal
 				return;
 			} else {

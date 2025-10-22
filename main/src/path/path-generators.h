@@ -5,17 +5,18 @@
 #include "../globals.h"
 #include "../io/logging.h"
 
-void lineGenerator();
-void sinGenerator();
-void zigZagGenerator();
-void doubleLineGenerator();
-void circleGenerator();
-void diamondGenerator();
-void squareGeneratorSine();
-void squareGeneratorWave();
-void squareGeneratorMake();
-void drillSquareGenerator();
+Point lineGenerator(int i);
+Point sinGenerator(int i);
+Point zigZagGenerator(int i);
+Point doubleLineGenerator(int i);
+Point circleGenerator(int i);
+Point diamondGenerator(int i);
+Point squareGeneratorSine(int i);
+// Point squareGeneratorWave(int i);
+// Point squareGeneratorMake(int i);
+// Point drillSquareGenerator(int i);
 void makePresetPath();
+void updatePresetPathBuffer();
 
 // Path properties
 extern const float sinAmp;

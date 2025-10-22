@@ -151,26 +151,26 @@ void drawShape() {
 				screen->drawPixel(centerX+x, centerY+y, WHITE);
 			}
 			break;
+		// case 6:
+		// 	// square with Make
+		// 	drawCenteredText("M:",2);
+		// 	screen->drawLine(centerX-size, centerY, centerX, centerY+size, WHITE);
+		// 	screen->drawLine(centerX, centerY+size, centerX+size, centerY, WHITE);
+		// 	screen->drawLine(centerX+size, centerY, centerX, centerY-size, WHITE);
+		// 	screen->drawLine(centerX, centerY-size, centerX-size, centerY, WHITE);
+		// 	break;
 		case 6:
-			// square with Make
-			drawCenteredText("M:",2);
-			screen->drawLine(centerX-size, centerY, centerX, centerY+size, WHITE);
-			screen->drawLine(centerX, centerY+size, centerX+size, centerY, WHITE);
-			screen->drawLine(centerX+size, centerY, centerX, centerY-size, WHITE);
-			screen->drawLine(centerX, centerY-size, centerX-size, centerY, WHITE);
-			break;
-		case 7:
 			// circle
 			screen->drawCircle(centerX, centerY, size, WHITE);
 			break;
-		case 8:
-			// square drill
-			screen->drawCircle(centerX-size, centerY-size, dot_size, WHITE);
-			screen->drawCircle(centerX+size, centerY-size, dot_size, WHITE);
-			screen->drawCircle(centerX-size, centerY+size, dot_size, WHITE);
-			screen->drawCircle(centerX+size, centerY+size, dot_size, WHITE);
-			screen->drawCircle(centerX, centerY, dot_size, WHITE);
-			break;
+		// case 8:
+		// 	// square drill
+		// 	screen->drawCircle(centerX-size, centerY-size, dot_size, WHITE);
+		// 	screen->drawCircle(centerX+size, centerY-size, dot_size, WHITE);
+		// 	screen->drawCircle(centerX-size, centerY+size, dot_size, WHITE);
+		// 	screen->drawCircle(centerX+size, centerY+size, dot_size, WHITE);
+		// 	screen->drawCircle(centerX, centerY, dot_size, WHITE);
+		// 	break;
 		// 	// hexagon
 		// 	screen->drawLine(centerX, centerY+size, centerX+size*cos(M_PI/6), centerY-size*sin(M_PI/6), WHITE);
 		// 	screen->drawLine(centerX+size*cos(M_PI/6), centerY-size*sin(M_PI/6), centerX+size*cos(M_PI/6), centerY-size*sin(M_PI/6), WHITE);

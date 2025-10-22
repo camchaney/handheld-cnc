@@ -40,8 +40,9 @@
 
 // Constants
 // #define MAX_PATHS  			10
-#define MAX_POINTS 			8000
-#define BUFFER_SIZE	 		16
+// #define MAX_POINTS 			8000
+#define PATH_BUFFER_SIZE	16
+#define MAX_STRING_LENGTH	32
 #define MAX_FILES			100
 #define GC9A01A_WEBWORK_GREEN 0x8FF1
 

@@ -32,8 +32,9 @@ extern float motorPosX;
 extern DesignType designType;
 
 // Path data
-extern Path path;
-extern Path pathBuffer;
+extern PathInfo pathInfo;
+extern PathBuffer pathBuffer;
+extern uint32_t currentFilePosition;
 extern int current_point_idx;
 
 // SD stuff
