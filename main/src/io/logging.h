@@ -20,8 +20,7 @@
 #define PACKET_PATH_POINT	0xA3
 
 #define LINE_BUFFER_SIZE	100
-#define MAX_STRING_LENGTH	32
-#define MAXBUFFER 			220000
+#define MAXBUFFER 			220000			// NOTE: what is this used for?
 
 // Header information structure
 struct FileHeader {
@@ -95,7 +94,8 @@ void handleFileSelection();
 void handleSpeedRun();
 bool validCommand(const char* gLine);
 bool validCoordinate(const char* gLine);
-void parseGCodeFile(const String& sFilename);
+void parseGCodeFile();
+void updatePathBuffer();
 bool initializeLogFile();
 void writeFileHeader(const char* designName, uint16_t numPaths);
 // void writePathInfo(uint16_t pathIndex, uint8_t featureType);

@@ -1,9 +1,12 @@
 #include "logging.h"
 
 // File info
-char filename[MAX_STRING_LENGTH];
+String sFilename;
 String fullPath;
 int currentLineNum = 0;
+
+// GCode parsing variables
+bool activeFeature = false;
 
 // Timing variables
 static long unsigned timeLastOutput = 0;
@@ -58,6 +61,10 @@ String getParentPath(const char* path) {
 }
 
 void handleFileSelection() {
+	currentFilePosition = 0;
+	// Reset path buffer
+	pathBuffer = PathBuffer();
+
 	if (current_file_idx >= 0 && current_file_idx < totalFiles) {
 		String selectedFile = fileList[current_file_idx];
 		
@@ -89,8 +96,10 @@ void handleFileSelection() {
 			current_file_idx = 0;
 		} else {
 			// Handle file selection
-			parseGCodeFile(selectedFile);
-			logPath();
+			sFilename = selectedFile;
+			parseGCodeFile();		// get path info from file
+			updatePathBuffer();
+			// logPath();		// TODO: doesn't work yet for live gCode parsing
 
 			state = DESIGN_SELECTED;
 			
@@ -103,8 +112,8 @@ void handleSpeedRun() {
 	String selectedFile = "RMRRF/rmrrf.nc";
 	
 	// Handle file selection
-	parseGCodeFile(selectedFile);
-	logPath();
+	updatePathBuffer();
+	// logPath();		// TODO: doesn't work yet for live gCode parsing
 		
 	delay(100);
 }
@@ -141,14 +150,15 @@ bool validCoordinate(const char* gLine) {
 	return false;
 }
 
-void parseGCodeFile(const String& sFilename) {
+void parseGCodeFile() {
 	// For live gCode parsing, this function will only read the file at the start
 	// 	and store key parameters:
 	//		- numPoints
 	//		- minZ
 	
 	// Update filename variable (for logging purposes only)
-	snprintf(filename, MAX_STRING_LENGTH, "%s", sFilename.c_str());
+	snprintf(pathInfo.filename, MAX_STRING_LENGTH, "%s", sFilename.c_str());
+
 	// Construct full path by combining current path and filename
 	if (currentPath == "/") {
 		fullPath = String("/") + sFilename;
@@ -157,7 +167,6 @@ void parseGCodeFile(const String& sFilename) {
 	}
 
 	const char* filePath = fullPath.c_str();
-
 	FsFile file;
 	if (!file.open(filePath, O_READ)) {
 		Serial.printf("Failed to open file: %s\n", filePath);
@@ -166,17 +175,11 @@ void parseGCodeFile(const String& sFilename) {
 	Serial.printf("Opened file: %s\n", filePath);
 
 	// Reset path
-	path.numPoints = 0;
-	
-	// Reset all points in the path
-	for (int j = 0; j < MAX_POINTS; j++) {
-		path.points[j] = {0.0f};
-		path.points[j].feature = NORMAL;
-	}
+	pathInfo.numPoints = 0;
 
 	char line[LINE_BUFFER_SIZE];
-	Path* activePath = &path;
-	bool activeFeature = false;
+	PathInfo* activePath = &pathInfo;
+	activeFeature = false;
 	Point lastPoint = {0};
 
 	while (file.fgets(line, sizeof(line))) {
@@ -222,83 +225,83 @@ void parseGCodeFile(const String& sFilename) {
 					if (newPoint.z < activePath->minZ) {
 						activePath->minZ = newPoint.z;			// TODO: maybe not necessary (unused right now)
 					}
-					if (newPoint.z > 4.0) {
-						// TODO: this is bandaid for shitty gcode! Remove this
-						newPoint.z = 4.0;
-					}
-					// if matThickness is set to 0 (drawing), then don't pierce!
-					if (matThickness == 0.0 && designType == FROM_FILE && newPoint.z < 0.0) newPoint.z = 0.0f;
 					break;
-				// TODO: parse feedrate (F) and, for holes, retract height (R)
-				// case 'F':
-				// 	newPoint.f = atof(ptr + 1);
-				// 	break;
-				// case 'R':
 				}
-				newPoint.f = feedrate_default;
 				ptr++;
 			}
 
 			// Add point to current path if there's space
-			if (hasNewCoordinate && activePath->numPoints < MAX_POINTS) {
+			if (hasNewCoordinate) {
 				if (newPoint.feature != DRILL) {
-					// Add a normal point
-					activePath->points[activePath->numPoints] = newPoint;
 					activePath->numPoints++;
 					// Serial.printf("Point: X(%f), Y(%f), Z(%f)\n", newPoint.x, newPoint.y, newPoint.z);
-				} else if (activePath->numPoints + 2 < MAX_POINTS){
-					// Make a drill cycle
-					// TODO: make this cleaner and more universal for drill cycles
-					float zVals[3] = {restHeight, newPoint.z, restHeight};
-					for (int i = 0; i < 3; i++) {
-						activePath->points[activePath->numPoints] = newPoint;
-						activePath->points[activePath->numPoints].z = zVals[i];
-						activePath->numPoints++;
-						// Serial.printf("Point: X(%f), Y(%f), Z(%f)\n", newPoint.x, newPoint.y, zVals[i]);
-					}
 				} else {
-					Serial.println("Path is full!");
-					break;
+					// Make a drill cycle
+					activePath->numPoints += 3;
 				}
-			} else if (activePath->numPoints >= MAX_POINTS) {
-				Serial.println("Path is full!");
-				break;
 			}
 
 			lastPoint = newPoint;
 		}
 	}
-
+	Serial.printf("Number of points in path: %d\n", activePath->numPoints);
 	file.close();
+
+	// Reset properties for path execution
+	activeFeature = false;
 }
 
 void updatePathBuffer() {
 	// TODO: make this a part of the Path class
 	// open SD card
-	// read current_line + 1 until BUFFER_SIZE points have been read or end of file
+	// read current_line + 1 until PATH_BUFFER_SIZE points have been read or end of file
 	// store points in pathBuffer
+
+	// Serial.printf("Updating, current_point_idx: %d, first_point_idx: %d\n", current_point_idx, pathBuffer.first_point_idx);
+
+	int last_rel_idx = current_point_idx - pathBuffer.first_point_idx;
+	if (last_rel_idx == 0 && !isnan(pathBuffer.points[0].x)) {
+		// TODO: this conditional lets the code through unnecessarily at idx = 0
+		// Path has not progressed, no need to update buffer
+		Serial.println("Path buffer is up to date.");
+		return;
+	}
+	pathBuffer.first_point_idx = current_point_idx;
 	
 	const char* filePath = fullPath.c_str();
-	char line[LINE_BUFFER_SIZE];
-	Path* activePath = &path;
-	bool activeFeature = false;
-	Point lastPoint = {0};
-	int rel_point_idx = 0;
-
 	FsFile file;
 	if (!file.open(filePath, O_READ)) {
 		Serial.printf("Failed to open file: %s\n", filePath);
 		return;
 	}
 
+	file.seek(currentFilePosition);			// Seek to last known position
+	// Serial.printf("Current file position before reading: %lu\n", currentFilePosition);
+	
+	char line[LINE_BUFFER_SIZE];
+	PathBuffer* activeBuffer = &pathBuffer;
+	Point lastPoint = activeBuffer->points[last_rel_idx];
+	int buffer_idx = 0;			// relative point index within buffer (curr_point_idx - first_point_idx)
+
 	// Clear pathBuffer
-	for (int j = 0; j < BUFFER_SIZE; j++) {
-		pathBuffer.points[j] = {NAN};
+	// TODO: is there a better way to do this without emptying and filling every point?
+	for (int j = 0; j < PATH_BUFFER_SIZE; j++) {
+		activeBuffer->points[j] = {NAN};
+	}
+	if (!isnan(lastPoint.x) && !isnan(lastPoint.y) && !isnan(lastPoint.z)) {
+		// If lastPoint is valid, store it as the first point in the buffer
+		activeBuffer->points[0] = lastPoint;
+		buffer_idx = 1;
 	}
 	
 	// TODO: optimize buffer forming
 	// Go through each line until buffer is filled
-	while (rel_point_idx < BUFFER_SIZE && file.fgets(line, sizeof(line))) {
+	while (buffer_idx < PATH_BUFFER_SIZE) {
+		currentFilePosition = file.position();
+		if (!file.fgets(line, sizeof(line))) { break; }		// break if end of file reached
+		// Serial.printf("Line: %s", line);
+		// Serial.printf("Processing line at position: %lu\n", currentFilePosition);
+
 		bool hasNewCoordinate = false;
 
 		// Skip all the nonsense
@@ -337,14 +340,11 @@ void updatePathBuffer() {
 				case 'Z':
 					newPoint.z = atof(ptr + 1);
 					hasNewCoordinate = true;
-					if (newPoint.z < activePath->minZ) {
-						activePath->minZ = newPoint.z;			// TODO: maybe not necessary
-						// Serial.printf("Minimum z = %f", activePath->minZ);
-					}
 					if (newPoint.z > 4.0) {
 						// TODO: this is bandaid for shitty gcode! Remove this
 						newPoint.z = 4.0;
 					}
+					if (matThickness == 0.0 && designType == FROM_FILE && newPoint.z < 0.0) newPoint.z = 0.0f;
 					break;
 				// TODO: parse feedrate (F) and, for holes, retract height (R)
 				// case 'F':
@@ -356,43 +356,37 @@ void updatePathBuffer() {
 				ptr++;
 			}
 
-			// Add point to current path if there's space
-			if (hasNewCoordinate && activePath->numPoints < MAX_POINTS) {
+			// Add point to buffer if there's space
+			if (hasNewCoordinate) {
+				Serial.printf("Storing next position: %lu\n", currentFilePosition);
+
+				// TODO: new function for all the different G-code commands
 				if (newPoint.feature != DRILL) {
 					// Add a normal point
-					activePath->points[activePath->numPoints] = newPoint;
-					activePath->numPoints++;
-					// Serial.printf("Point: X(%f), Y(%f), Z(%f)\n", newPoint.x, newPoint.y, newPoint.z);
-				} else if (activePath->numPoints + 2 < MAX_POINTS){
+					activeBuffer->points[buffer_idx] = newPoint;
+					buffer_idx++;
+					Serial.printf("Point: X(%f), Y(%f), Z(%f)\n", newPoint.x, newPoint.y, newPoint.z);
+				} else if (newPoint.feature == DRILL) {
 					// Make a drill cycle
 					// TODO: make this cleaner and more universal for drill cycles
-					float zVals[3] = {restHeight, newPoint.z, restHeight};
-					for (int i = 0; i < 3; i++) {
-						activePath->points[activePath->numPoints] = newPoint;
-						activePath->points[activePath->numPoints].z = zVals[i];
-						activePath->numPoints++;
-						// Serial.printf("Point: X(%f), Y(%f), Z(%f)\n", newPoint.x, newPoint.y, zVals[i]);
+					if (buffer_idx + 2 < PATH_BUFFER_SIZE) {
+						float zVals[3] = {restHeight, newPoint.z, restHeight};
+						for (int i = 0; i < 3; i++) {
+							activeBuffer->points[buffer_idx] = newPoint;
+							activeBuffer->points[buffer_idx].z = zVals[i];
+							buffer_idx++;
+							Serial.printf("Point: X(%f), Y(%f), Z(%f)\n", newPoint.x, newPoint.y, zVals[i]);
+						}
 					}
 				} else {
-					Serial.println("Path is full!");
+					Serial.println("Unknown G-code command!");
 					break;
 				}
-			} else if (activePath->numPoints >= MAX_POINTS) {
-				Serial.println("Path is full!");
-				break;
 			}
 
 			lastPoint = newPoint;
 		}
 	}
-
-
-}
-
-void parseGCodeLine(const String& sFilename, const) {
-	// TODO: do this with a buffer so that it can be used with interrupts and lookahead acceleration profiles
-	// This function will parse a single line of gCode and add it to the path
-
 }
 
 // Write to Serial ------------------------------------------------------
@@ -689,6 +683,7 @@ void closeSDFile() {
 
 void logPath() {
 	// Log path data to SD card if enabled
+	// TODO: this will all have to be read from the SD for live gCode parsing
 	if (outputSDOn) {
 		if (!initializeLogFile()) {
 			Serial.println("Failed to initialize log file!");
@@ -698,39 +693,41 @@ void logPath() {
 		if (designType == PRESET) {
 			char designName[MAX_STRING_LENGTH];
 			sprintf(designName, "preset_%i", designPreset);
-			writeFileHeader(designName, path.numPoints);
+			writeFileHeader(designName, pathInfo.numPoints);
 		} else {
-			writeFileHeader(filename, path.numPoints);
+			writeFileHeader(pathInfo.filename, pathInfo.numPoints);
 		}
 		
-		for (int i = 0; i < path.numPoints; i++) {
+		for (int i = 0; i < pathInfo.numPoints; i++) {
 			// Write each point in the path
-			writePathPoint(i, path.points[i]);
+			// TODO: implement path logging at start of design for live gCode parsing
+			// writePathPoint(i, path.points[i]);
 		}
 
 		if (logFile) logFile.flush();
 	} else {
 		Serial.println("Logging to SD card is disabled.");
-			// Log path data to serial if enabled
+		// Log path data to serial if enabled
 		// for (int j = 0; j < path.numPoints; j++) {
-		for (int i = 0; i < 50; i++) {
-			Serial.printf(
-				"POINT[%i]:%f,%f,%f\n",
-				i,
-				path.points[i].x,
-				path.points[i].y,
-				path.points[i].z
-			);
-		}
-		Serial.println("...");
-		for (int i = path.numPoints - 50; i < path.numPoints; i++) {
-			Serial.printf(
-				"POINT[%i]:%f,%f,%f\n",
-				i,
-				path.points[i].x,
-				path.points[i].y,
-				path.points[i].z
-			);
-		}
+		// TODO: implement serial path logging for live gCode parsing
+		// for (int i = 0; i < 50; i++) {
+		// 	Serial.printf(
+		// 		"POINT[%i]:%f,%f,%f\n",
+		// 		i,
+		// 		path.points[i].x,
+		// 		path.points[i].y,
+		// 		path.points[i].z
+		// 	);
+		// }
+		// Serial.println("...");
+		// for (int i = path.numPoints - 50; i < path.numPoints; i++) {
+		// 	Serial.printf(
+		// 		"POINT[%i]:%f,%f,%f\n",
+		// 		i,
+		// 		path.points[i].x,
+		// 		path.points[i].y,
+		// 		path.points[i].z
+		// 	);
+		// }
 	}
 }
