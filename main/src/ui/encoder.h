@@ -21,9 +21,8 @@ void StartZeroWorkspace();
 void onClickZeroWorkspaceZ(EncoderButton &eb);
 void onClickZeroWorkspaceXY(EncoderButton &eb);
 void onHoldAutoTouch(HandleButtons &btn);
-void onClickAcceptAutoTouch();
 void onClickAcceptAutoTouchE(EncoderButton &eb);
-void onClickAcceptAutoTouchH(HandleButtons &eb);
+void onClickAcceptAutoTouchH(HandleButtons &btn);
 void onClickCancelAutoTouch(HandleButtons &eb);
 
 // Thickness handlers
@@ -60,5 +59,6 @@ void encoderEndScreen();
 
 // Zeroing functions
 void StartZeroWorkspace();
+void acceptAutoTouch();
 
 #endif

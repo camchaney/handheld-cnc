@@ -199,6 +199,8 @@ void machineZeroXY() {
 }
 
 void workspaceZeroZ() {
+	// Manually zero the Z axis to the workpiece using the knob
+
 	enableStepperZ();
 	stepperZ.setCurrentPosition(0);
 
@@ -231,8 +233,11 @@ void workspaceZeroZ() {
 }
 
 void autoTouchWorkspaceZ() {
+	// Automatically touch the workpiece with the Z axis
+
 	enableStepperZ();
 
+	// Move to limit switch
 	stepperZ.setSpeed(zeroSpeed_0 * ConvLead);
 	while (digitalRead(LIMIT_MACH_Z0) == HIGH) {
 		stepperZ.runSpeed();
@@ -253,6 +258,7 @@ void autoTouchWorkspaceZ() {
 		stepperZ.run();
 	}
 
+	// Set up auto touch
 	driverZ.rms_current(maxAutoTouchCurrent_RMS);
 	driverZ.TCOOLTHRS(0xFFFFF);
 	driverZ.TPWMTHRS(0);
@@ -265,7 +271,7 @@ void autoTouchWorkspaceZ() {
 	Timer1.initialize(autoTouchStepInterval);
 	Timer1.attachInterrupt(zStepISR);
 
-	 uint32_t last_time = millis();
+	uint32_t last_time = millis();
 
 	while (zStepActive) {
 		uint32_t ms = millis();
@@ -283,12 +289,15 @@ void autoTouchWorkspaceZ() {
 		}
 
 		if ((digitalRead(BUTT_HANDLE_L) != LOW) || (digitalRead(BUTT_HANDLE_R) != LOW)) {
+			// Cancel auto touch if either button becomes unpressed
 			zStepActive = false;
 			break;
 		}
 
 		delay(1); // Allow time for ISR and checks
 	}
+
+	// TODO: do another auto touch at slower speed for more precision
 
 	Timer1.detachInterrupt();
 	delay(1); // Allow time for the last step to complete
@@ -305,8 +314,8 @@ void autoTouchWorkspaceZ() {
 }
 
 void acceptAutoTouchWorkspaceZ() {
+	maxHeight = (zStepCount * 1.0f / ConvLead) - autoTouchRetraction;
 	stepperZ.setCurrentPosition(0);
-	maxHeight = stepperZ.currentPosition()*1.0f / ConvLead;
 
 	stepperZ.setMaxSpeed(maxSpeedZ/2);
 	stepperZ.moveTo(restHeight * ConvLead);
