@@ -5,9 +5,8 @@ Print all parts at 40% infill or higher.
 - (2x) baseStage.stl
 - (1x) baseStagePlug.stl
 - (2x) cableClip.stl
-- (1x) displayRing.stl
-	- *_ae* if using AliExpress display
-	- *_ws* if using Amazon Waveshare display
+- (1x) displayRing_01.stl
+- (1x) facePlate.stl (can use sheet material instead, see `shm` folder)
 - (1x) frameUILeft.stl
 - (1x) frameUIRight.stl
 - (2x) handle.stl
@@ -49,7 +48,7 @@ Print all parts at 40% infill or higher.
 - (1x) basePlate.dxf - 6mm (1/4" also works)
 - (1x) facePlate.dxf - 1/16"
 	- Note: this can be made in wood or acrylic too (1/8" should be fine) since it's not structural.
-	- It can also be 3D printed or made using a PCB (see PCB folder...)
+	- It can also be 3D printed (facePlate.stl)
 
 ## Cable Harnesses
 - (2x) sensorWire_ETH_20_CAT5
