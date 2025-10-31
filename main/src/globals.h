@@ -8,6 +8,7 @@
 #include <SdFat.h>
 #include <Arduino_GFX_Library.h>
 #include <EncoderButton.h>
+#include "ui/HandleButtons.h"
 #include "config.h"
 #include "types.h"
 
@@ -20,6 +21,7 @@ extern TMC2209Stepper driverL;
 extern TMC2209Stepper driverZ;
 extern PMW3360 sensors[4];
 extern EncoderButton encoder;
+extern HandleButtons handleButtons;
 extern Arduino_GFX *screen;
 extern SdFat sd;
 

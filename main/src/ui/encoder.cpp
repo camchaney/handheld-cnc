@@ -26,15 +26,44 @@ void onClickZeroMachineXY(EncoderButton &eb) {
 	drawCenteredText("Zeroing Machine XY...", 2);
 	machineZeroXY();
 	state = MACHINE_XY_ZERO;
-	drawCenteredText("Zero Workspace Z", 2);
-	encoder.setClickHandler(onClickZeroWorkspaceZ);
+	startZeroWorkspace();
+}
+
+void onHoldAutoTouch(HandleButtons &btn) {
+	drawCenteredText("Auto touch...", 2);
+	if (autoTouchWorkspaceZ()) {
+		handleButtons.setLeftClickHandler(onClickCancelAutoTouch);
+		handleButtons.setRightClickHandler(onClickAcceptAutoTouchH);
+		encoder.setClickHandler(onClickAcceptAutoTouchE);
+		drawCenteredText("Touched!\nL to cancel\nR to accept", 2);
+	} else {
+		handleButtons.enable(false);
+		handleButtons.clearHandlers();
+		startZeroWorkspace();
+	}
 }
 
 void onClickZeroWorkspaceZ(EncoderButton &eb) {
+	handleButtons.enable(false);
+	handleButtons.clearHandlers();
 	drawCenteredText("Zeroing Workspace Z...", 2);
 	workspaceZeroZ();
 	state = WORKSPACE_Z_ZERO;
 	encoderSetThickness();
+}
+
+void onClickCancelAutoTouch(HandleButtons &btn) {
+	handleButtons.enable(false);
+	handleButtons.clearHandlers();
+	startZeroWorkspace();
+}
+
+void onClickAcceptAutoTouchE(EncoderButton &eb) {
+	acceptAutoTouch();
+}
+
+void onClickAcceptAutoTouchH(HandleButtons &btn) {
+	acceptAutoTouch();
 }
 
 void onClickZeroWorkspaceXY(EncoderButton &eb) {
@@ -281,6 +310,20 @@ void encoderDesignSelect() {
 	for (int i = 0; i < 4; i++) {
 		sensors[i].readBurst();
 	}
+}
+
+void startZeroWorkspace() {
+	drawCenteredText("Zero Workspace Z\nHold L+R for\nauto touch", 2);
+	encoder.setClickHandler(onClickZeroWorkspaceZ);
+	handleButtons.setButtonsHoldHandler(onHoldAutoTouch);
+	handleButtons.enable(true);
+}
+
+void acceptAutoTouch() {
+	handleButtons.enable(false);
+	acceptAutoTouchWorkspaceZ();
+	state = WORKSPACE_Z_ZERO;
+	encoderSetThickness();
 }
 
 void encoderHandlePause() {

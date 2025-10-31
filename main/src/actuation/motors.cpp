@@ -1,6 +1,11 @@
 #include "motors.h"
+#include <TimerOne.h>
 
 float maxHeight = 0.0f;
+volatile bool zZeroed = false;
+volatile long zStepCount = 0;
+volatile long zStepTarget = 0;
+volatile bool zStepActive = false;
 
 void motorSetup() {
 	// Set up motors
@@ -195,6 +200,8 @@ void machineZeroXY() {
 }
 
 void workspaceZeroZ() {
+	// Manually zero the Z axis to the workpiece using the knob
+
 	enableStepperZ();
 	stepperZ.setCurrentPosition(0);
 
@@ -215,6 +222,103 @@ void workspaceZeroZ() {
 
 	maxHeight = stepperZ.currentPosition()*1.0f / ConvLead;
 	// Serial.printf("Current Z position: %.2f\n", maxHeight);
+
+	stepperZ.setMaxSpeed(maxSpeedZ/2);
+	stepperZ.moveTo(restHeight * ConvLead);
+	while (stepperZ.distanceToGo() != 0) {
+		stepperZ.run();
+	}
+
+	stepperZ.setMaxSpeed(maxSpeedZ);
+	stepperZ.setAcceleration(maxAccelZ);
+}
+
+bool autoTouchWorkspaceZ() {
+	enableStepperZ();
+
+	// Move to limit switch
+	stepperZ.setSpeed(zeroSpeed_0 * ConvLead);
+	while (digitalRead(LIMIT_MACH_Z0) == HIGH) {
+		stepperZ.runSpeed();
+	}
+
+	stepperZ.move(-retract * ConvLead);
+	while (stepperZ.distanceToGo() != 0) {
+		stepperZ.run();
+	}
+
+	stepperZ.setSpeed(zeroSpeed_1 * ConvLead);
+	while (digitalRead(LIMIT_MACH_Z0) == HIGH) {
+		stepperZ.runSpeed();
+	}
+
+	stepperZ.move(-retract * ConvLead);
+	while (stepperZ.distanceToGo() != 0) {
+		stepperZ.run();
+	}
+
+	// Set up auto touch
+	driverZ.rms_current(maxAutoTouchCurrent_RMS);
+	driverZ.TCOOLTHRS(0xFFFFF);
+	driverZ.TPWMTHRS(0);
+
+	long maxSteps = zRange * ConvLead;
+	zZeroed = false;
+	zStepCount = 0;
+	zStepTarget = maxSteps;
+	zStepActive = true;
+	digitalWrite(MOT_DIR_Z, HIGH);
+	Timer1.initialize(autoTouchStepInterval);
+	Timer1.attachInterrupt(zStepISR);
+
+	uint32_t last_time = millis();
+
+	while (zStepActive) {
+		uint32_t ms = millis();
+		if((ms-last_time) > 100) { //run every 0.1s
+			last_time = ms;
+
+			uint16_t sg = driverZ.SG_RESULT();
+			Serial.print("SG_RESULT: ");
+			Serial.println(sg, DEC);
+			if (sg < autoTouchThreshold) {
+				Serial.println("Touched!");
+				zZeroed = true;
+				zStepActive = false;
+				break;
+			}
+		}
+
+		if ((digitalRead(BUTT_HANDLE_L) != LOW) || (digitalRead(BUTT_HANDLE_R) != LOW)) {
+			zZeroed = false;
+			zStepActive = false;
+			break;
+		}
+
+		delay(1); // Allow time for ISR and checks
+	}
+
+	// TODO: do another auto touch at slower speed for more precision
+
+	Timer1.detachInterrupt();
+	delay(1); // Allow time for the last step to complete
+	Serial.println("Compensate backslash...");
+	stepperZ.move(autoTouchRetraction* ConvLead);
+	while (stepperZ.distanceToGo() != 0) {
+		stepperZ.run();
+	}
+
+	// restore defaults
+	driverZ.rms_current(maxCurrent_RMS);
+	driverZ.TCOOLTHRS(0);
+	driverZ.TPWMTHRS(0x753);
+
+	return zZeroed;
+}
+
+void acceptAutoTouchWorkspaceZ() {
+	maxHeight = (zStepCount * 1.0f / ConvLead) - autoTouchRetraction;
+	stepperZ.setCurrentPosition(0);
 
 	stepperZ.setMaxSpeed(maxSpeedZ/2);
 	stepperZ.moveTo(restHeight * ConvLead);
@@ -277,4 +381,19 @@ void motorToCartesian(float &x, float &y, float &z) {
 	x = (a + b) / 2;
 	y = (a - b) / 2;
 	z = stepperZ.currentPosition() * 1.0f / ConvLead;
+}
+
+void zStepISR() {
+	if (!zStepActive) return;
+	if (zStepCount >= zStepTarget) {
+		zStepActive = false;
+		digitalWrite(MOT_STEP_Z, LOW);
+		Timer1.detachInterrupt();
+		return;
+	}
+	// Generate one step pulse
+	digitalWrite(MOT_STEP_Z, HIGH);
+	delayMicroseconds(stepPulseWidth);
+	digitalWrite(MOT_STEP_Z, LOW);
+	zStepCount++;
 }
