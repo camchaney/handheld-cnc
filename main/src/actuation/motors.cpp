@@ -200,6 +200,8 @@ void machineZeroXY() {
 }
 
 void workspaceZeroZ() {
+	// Manually zero the Z axis to the workpiece using the knob
+
 	enableStepperZ();
 	stepperZ.setCurrentPosition(0);
 
@@ -234,6 +236,7 @@ void workspaceZeroZ() {
 bool autoTouchWorkspaceZ() {
 	enableStepperZ();
 
+	// Move to limit switch
 	stepperZ.setSpeed(zeroSpeed_0 * ConvLead);
 	while (digitalRead(LIMIT_MACH_Z0) == HIGH) {
 		stepperZ.runSpeed();
@@ -254,6 +257,7 @@ bool autoTouchWorkspaceZ() {
 		stepperZ.run();
 	}
 
+	// Set up auto touch
 	driverZ.rms_current(maxAutoTouchCurrent_RMS);
 	driverZ.TCOOLTHRS(0xFFFFF);
 	driverZ.TPWMTHRS(0);
@@ -293,6 +297,8 @@ bool autoTouchWorkspaceZ() {
 
 		delay(1); // Allow time for ISR and checks
 	}
+
+	// TODO: do another auto touch at slower speed for more precision
 
 	Timer1.detachInterrupt();
 	delay(1); // Allow time for the last step to complete
