@@ -26,7 +26,7 @@ void onClickZeroMachineXY(EncoderButton &eb) {
 	drawCenteredText("Zeroing Machine XY...", 2);
 	machineZeroXY();
 	state = MACHINE_XY_ZERO;
-	StartZeroWorkspace();
+	startZeroWorkspace();
 }
 
 void onHoldAutoTouch(HandleButtons &btn) {
@@ -39,7 +39,7 @@ void onHoldAutoTouch(HandleButtons &btn) {
 	} else {
 		handleButtons.enable(false);
 		handleButtons.clearHandlers();
-		StartZeroWorkspace();
+		startZeroWorkspace();
 	}
 }
 
@@ -55,7 +55,7 @@ void onClickZeroWorkspaceZ(EncoderButton &eb) {
 void onClickCancelAutoTouch(HandleButtons &btn) {
 	handleButtons.enable(false);
 	handleButtons.clearHandlers();
-	StartZeroWorkspace();
+	startZeroWorkspace();
 }
 
 void onClickAcceptAutoTouchE(EncoderButton &eb) {
@@ -312,7 +312,7 @@ void encoderDesignSelect() {
 	}
 }
 
-void StartZeroWorkspace() {
+void startZeroWorkspace() {
 	drawCenteredText("Zero Workspace Z\nHold L+R for\nauto touch", 2);
 	encoder.setClickHandler(onClickZeroWorkspaceZ);
 	handleButtons.setButtonsHoldHandler(onHoldAutoTouch);

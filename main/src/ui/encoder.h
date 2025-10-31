@@ -17,7 +17,7 @@ void onClickResetState(EncoderButton &eb);
 
 // Zeroing handlers
 void onClickZeroMachineXY(EncoderButton &eb);
-void StartZeroWorkspace();
+void startZeroWorkspace();
 void onClickZeroWorkspaceZ(EncoderButton &eb);
 void onClickZeroWorkspaceXY(EncoderButton &eb);
 void onHoldAutoTouch(HandleButtons &btn);
@@ -58,7 +58,7 @@ void encoderHandlePause();
 void encoderEndScreen();
 
 // Zeroing functions
-void StartZeroWorkspace();
+void startZeroWorkspace();
 void acceptAutoTouch();
 
 #endif
