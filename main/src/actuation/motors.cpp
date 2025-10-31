@@ -2,6 +2,7 @@
 #include <TimerOne.h>
 
 float maxHeight = 0.0f;
+volatile bool zZeroed = false;
 volatile long zStepCount = 0;
 volatile long zStepTarget = 0;
 volatile bool zStepActive = false;
@@ -230,7 +231,7 @@ void workspaceZeroZ() {
 	stepperZ.setAcceleration(maxAccelZ);
 }
 
-void autoTouchWorkspaceZ() {
+bool autoTouchWorkspaceZ() {
 	enableStepperZ();
 
 	stepperZ.setSpeed(zeroSpeed_0 * ConvLead);
@@ -258,6 +259,7 @@ void autoTouchWorkspaceZ() {
 	driverZ.TPWMTHRS(0);
 
 	long maxSteps = zRange * ConvLead;
+	zZeroed = false;
 	zStepCount = 0;
 	zStepTarget = maxSteps;
 	zStepActive = true;
@@ -265,7 +267,7 @@ void autoTouchWorkspaceZ() {
 	Timer1.initialize(autoTouchStepInterval);
 	Timer1.attachInterrupt(zStepISR);
 
-	 uint32_t last_time = millis();
+	uint32_t last_time = millis();
 
 	while (zStepActive) {
 		uint32_t ms = millis();
@@ -277,12 +279,14 @@ void autoTouchWorkspaceZ() {
 			Serial.println(sg, DEC);
 			if (sg < autoTouchThreshold) {
 				Serial.println("Touched!");
+				zZeroed = true;
 				zStepActive = false;
 				break;
 			}
 		}
 
 		if ((digitalRead(BUTT_HANDLE_L) != LOW) || (digitalRead(BUTT_HANDLE_R) != LOW)) {
+			zZeroed = false;
 			zStepActive = false;
 			break;
 		}
@@ -302,6 +306,8 @@ void autoTouchWorkspaceZ() {
 	driverZ.rms_current(maxCurrent_RMS);
 	driverZ.TCOOLTHRS(0);
 	driverZ.TPWMTHRS(0x753);
+
+	return zZeroed;
 }
 
 void acceptAutoTouchWorkspaceZ() {

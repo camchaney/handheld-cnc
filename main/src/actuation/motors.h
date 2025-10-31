@@ -16,7 +16,7 @@ void stopStepperX();
 void stopStepperZ();
 void machineZeroXY();
 void workspaceZeroZ();
-void autoTouchWorkspaceZ();
+bool autoTouchWorkspaceZ();
 void acceptAutoTouchWorkspaceZ();
 void workspaceZeroXY();
 void cartesianToMotor(Position pos);

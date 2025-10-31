@@ -39,11 +39,16 @@ void StartZeroWorkspace()
 
 void onHoldAutoTouch(HandleButtons &btn) {
 	drawCenteredText("Auto touch...", 2);
-	autoTouchWorkspaceZ();
-	handleButtons.setLeftClickHandler(onClickCancelAutoTouch);
-	handleButtons.setRightClickHandler(onClickAcceptAutoTouchH);
-	encoder.setClickHandler(onClickAcceptAutoTouchE);
-	drawCenteredText("Touched!", 2);
+	if (autoTouchWorkspaceZ()) {
+		handleButtons.setLeftClickHandler(onClickCancelAutoTouch);
+		handleButtons.setRightClickHandler(onClickAcceptAutoTouchH);
+		encoder.setClickHandler(onClickAcceptAutoTouchE);
+		drawCenteredText("Touched!\nL to cancel\nR to accept", 2);
+	} else {
+		handleButtons.enable(false);
+		handleButtons.clearHandlers();
+		StartZeroWorkspace();
+	}
 }
 
 void onClickZeroWorkspaceZ(EncoderButton &eb) {
