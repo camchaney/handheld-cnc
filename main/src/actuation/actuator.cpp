@@ -1,7 +1,7 @@
 #include "actuator.h"
 
 ActuationController::ActuationController(Position &dp)
-    : desPos(&dp), pidX(1.0, 0.1, 0.01), pidY(1.0, 0.1, 0.01), pidZ(1.0, 0.1, 0.01) {
+    : desPos(&dp), pidX(1.0f, 0.1f, 0.01f), pidY(1.0f, 0.1f, 0.01f), pidZ(1.0f, 0.1f, 0.01f) {
 }
 
 // Compute actuator adjustments (call in control loop)

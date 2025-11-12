@@ -11,6 +11,38 @@
 #include "math/geometry.h"
 #include "io/logging.h"
 
+
+#ifdef PI
+#undef PI
+#endif
+#ifdef HALF_PI
+#undef HALF_PI
+#endif
+#ifdef TWO_PI
+#undef TWO_PI
+#endif
+#ifdef DEG_TO_RAD
+#undef DEG_TO_RAD
+#endif
+#ifdef RAD_TO_DEG
+#undef RAD_TO_DEG
+#endif
+#ifdef M_PI
+#undef M_PI
+#endif
+#ifdef M_SQRT2
+#undef M_SQRT2
+#endif
+
+#define PI 3.1415926535897932384626433832795f
+#define HALF_PI 1.5707963267948966192313216916398f
+#define TWO_PI 6.283185307179586476925286766559f
+#define DEG_TO_RAD 0.017453292519943295769236907684886f
+#define RAD_TO_DEG 57.295779513082320876798154814105f
+#define M_PI 3.1415926535897932384626433832795f
+#define M_SQRT2 1.4142135623730950488016887f
+
+
 void setup() {
 	Serial.begin(115200);  
 

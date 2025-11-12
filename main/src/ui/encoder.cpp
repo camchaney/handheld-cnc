@@ -137,10 +137,10 @@ void onClickEndScreen(EncoderButton &eb) {
 
 // ENCODER HANDLERS ----------------------------------------
 void onEncoderUpdateThickness(EncoderButton &eb) {
-	float incrScalar = 0.1;
+	float incrScalar = 0.1f;
 	float tempThickness = matThickness + eb.increment()*incrScalar;
 
-	if (tempThickness <= maxThickness && tempThickness >= 0.0) {
+	if (tempThickness <= maxThickness && tempThickness >= 0.0f) {
 		matThickness = tempThickness;
 	}
 	
@@ -186,11 +186,11 @@ void onEncoderPauseMenu(EncoderButton &eb) {
 }
 
 void onEncoderSetSpeed(EncoderButton &eb) {
-	float maxSpeed = 0.5 * maxSpeedAB / ConvBelt;
-	float incrScalar = 1.0;
+	float maxSpeed = 0.5f * maxSpeedAB / ConvBelt;
+	float incrScalar = 1.0f;
 	float tempSpeed = feedrate + eb.increment()*incrScalar;
 
-	if (tempSpeed <= maxSpeed && tempSpeed >= 1.0) {
+	if (tempSpeed <= maxSpeed && tempSpeed >= 1.0f) {
 		feedrate = tempSpeed;
 	}
 	
@@ -204,10 +204,10 @@ void onEncoderSetSpeed(EncoderButton &eb) {
 }
 
 void onEncoderSetBoost(EncoderButton &eb) {
-	float incrScalar = 0.1;
+	float incrScalar = 0.1f;
 	float tempBoost = feedrateBoost + eb.increment()*incrScalar;
 
-	if (tempBoost >= 0.1 && tempBoost <= 5.0) {
+	if (tempBoost >= 0.1f && tempBoost <= 5.0f) {
 		feedrateBoost = tempBoost;
 	}
 
@@ -295,7 +295,7 @@ void encoderDesignSelect() {
 	running = true;
 	current_point_idx = 0;
 	if (designType != SPEED_RUN) feedrate = feedrate_default;	// reset feedrate to default (NOTE: only RMRRF addition)
-	feedrateBoost = 1.0;	// reset feedrate boost to default
+	feedrateBoost = 1.0f;	// reset feedrate boost to default
 	speedRunTimer = 0;
 
 	state = READY;
@@ -366,7 +366,7 @@ void encoderEndScreen() {
 		drawCenteredText("WOOO nice job!", 2);
 	} else {
 		char text2send[50];
-		sprintf(text2send, "WOW!\nYour time was:\n%.2fs", speedRunTimer/1000.0);
+		sprintf(text2send, "WOW!\nYour time was:\n%.2fs", speedRunTimer/1000.0f);
 		drawCenteredText(text2send, 2);
 		feedrate = feedrate_default;	// reset feedrate to default (NOTE: only RMRRF addition)
 	}

@@ -2,7 +2,7 @@
 
 float myDist(float x1, float y1, float x2, float y2) {
 	// Calculate the Euclidean distance between two points
-	return sqrt(pow(x1 - x2, 2) + pow(y1 - y2, 2));
+	return sqrtf(powf(x1 - x2, 2.0f) + powf(y1 - y2, 2.0f));
 }
 
 float clamp(float val, float min, float max) {
@@ -40,13 +40,13 @@ float signedDist(RouterPose rPose, Point p) {
 	// Note: if the distance is:
 	//    < 0 - the point is in front of the gantry (it is yet to be passed)
 	//    > 0 - the point is behind the gantry (it has been passed)
-	float m = tan(rPose.yaw);
+	float m = tanf(rPose.yaw);
 	float b = rPose.y - m * rPose.x;
 	float A = m;
-	float B = -1;
+	float B = -1.0f;
 	float C = b;
 
-	return (A * p.x + B * p.y + C) / sqrt(pow(A, 2) + pow(B, 2));
+	return (A * p.x + B * p.y + C) / sqrtf(powf(A, 2.0f) + powf(B, 2.0f));
 }
 
 float angleFrom(Point a, Point b) {
@@ -65,7 +65,7 @@ float angleFrom(Point a, Point b) {
 	float th2 = principalAngleRad(pose.yaw);
 	// float th2 = pose.yaw;
 
-	return abs(th1 - th2);
+	return fabsf(th1 - th2);
 }
 
 int direction(Point g, Point n) {
@@ -77,9 +77,9 @@ int direction(Point g, Point n) {
 	// float angle = angleFrom(g, n);
 	float angle = atan2f(n.y - g.y, n.x - g.x) - pose.yaw;
 	
-	if (sin(angle) > 0) {
+	if (sinf(angle) > 0) {
 		return 1;
-	} else if (sin(angle) < 0) {
+	} else if (sinf(angle) < 0) {
 		return -1;
 	} else {
 		return 0;

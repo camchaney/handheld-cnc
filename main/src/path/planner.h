@@ -17,8 +17,8 @@ class TrajectoryGenerator {
 	
 	private:
 		// std::vector<GCodePoint> path;
-		float segmentTime = 0.0;
-		float currentTime = 0.0;
+		float segmentTime = 0.0f;
+		float currentTime = 0.0f;
 		size_t currentIndex = 0;
 	};
 

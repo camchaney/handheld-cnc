@@ -18,15 +18,15 @@
 */
 
 uint16_t TMCStepper::cs2rms(uint8_t CS) {
-  return (float)(CS+1)/32.0 * (vsense() ? 0.180 : 0.325)/(Rsense+0.02) / 1.41421 * 1000;
+  return (float)(CS+1)/32.0f * (vsense() ? 0.180f : 0.325f)/(Rsense+0.02f) / 1.41421f * 1000.0f;
 }
 
 void TMCStepper::rms_current(uint16_t mA) {
-  uint8_t CS = 32.0*1.41421*mA/1000.0*(Rsense+0.02)/0.325 - 1;
+  uint8_t CS = 32.0f*1.41421f*mA/1000.0f*(Rsense+0.02f)/0.325f - 1;
   // If Current Scale is too low, turn on high sensitivity R_sense and calculate again
   if (CS < 16) {
     vsense(true);
-    CS = 32.0*1.41421*mA/1000.0*(Rsense+0.02)/0.180 - 1;
+    CS = 32.0f*1.41421f*mA/1000.0f*(Rsense+0.02f)/0.180f - 1;
   } else { // If CS >= 16, turn off high_sense_r
     vsense(false);
   }
