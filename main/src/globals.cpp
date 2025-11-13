@@ -80,3 +80,9 @@ elapsedMicros runTimer;
 elapsedMicros filemicros;
 elapsedMillis speedRunTimer;
 uint8_t iter = 0;
+
+IntervalTimer sensorTimer;
+DMAChannel dmaSPI;
+volatile bool sensorDataReady = false;
+volatile uint32_t sensorStartTime = 0;
+PMW3360_DATA motionData[4];
