@@ -73,14 +73,17 @@ int16_t convTwosComp(int16_t value) {
 
 void setupSensorTimer() {
 	sensorTimer.begin(sensorTimerISR, dt);
+	sensorTimer.priority(128);
 }
 
 void sensorTimerISR() {
-	if (!sensorDataReady) {
-		sensorStartTime = micros();
-		readAllSensors();
-		sensorDataReady = true;
+	if (sensorDataReady) {
+		return;
 	}
+	
+	sensorStartTime = micros();
+	readAllSensors();
+	sensorDataReady = true;
 }
 
 void readAllSensors() {
