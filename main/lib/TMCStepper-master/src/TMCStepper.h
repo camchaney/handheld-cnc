@@ -146,7 +146,7 @@ class TMCStepper {
 		virtual uint8_t tbl() = 0;
 
 		const float Rsense;
-		float holdMultiplier = 0.5;
+		float holdMultiplier = 0.5f;
 };
 
 class TMC2130Stepper : public TMCStepper {
@@ -370,7 +370,7 @@ class TMC2130Stepper : public TMCStepper {
 		static uint32_t spi_speed; // Default 2MHz
 		const uint16_t _pinCS;
 		SW_SPIClass * TMC_SW_SPI = nullptr;
-		static constexpr float default_RS = 0.11;
+		static constexpr float default_RS = 0.11f;
 
 		int8_t link_index;
 		static int8_t chain_length;
@@ -472,7 +472,7 @@ class TMC2160Stepper : public TMC2130Stepper {
 		INIT_REGISTER(GLOBAL_SCALER){.sr=0};
 		INIT2160_REGISTER(PWMCONF){{.sr=0}};
 
-		static constexpr float default_RS = 0.075;
+		static constexpr float default_RS = 0.075f;
 };
 
 class TMC5130Stepper : public TMC2160Stepper {
@@ -693,7 +693,7 @@ class TMC5130Stepper : public TMC2160Stepper {
 		INIT_REGISTER(MSCURACT){0};
 		*/
 
-		static constexpr float default_RS = 0.15;
+		static constexpr float default_RS = 0.15f;
 
 	protected:
 		using TMC2160Stepper::SHORT_CONF;
@@ -810,7 +810,7 @@ class TMC5160Stepper : public TMC5130Stepper {
 
 		INIT_REGISTER(ENC_DEVIATION){.sr=0};
 
-		static constexpr float default_RS = 0.075;
+		static constexpr float default_RS = 0.075f;
 };
 
 class TMC5161Stepper : public TMC5160Stepper {
@@ -984,7 +984,7 @@ class TMC2208Stepper : public TMCStepper {
 		uint8_t pwm_grad_auto();
 
 		uint16_t bytesWritten = 0;
-		float Rsense = 0.11;
+		float Rsense = 0.11f;
 		bool CRCerror = false;
 	protected:
 		INIT2208_REGISTER(GCONF)			{{.sr=0}};
@@ -1256,8 +1256,8 @@ class TMC2660Stepper {
 
 		const uint16_t _pinCS;
 		const float Rsense;
-		static constexpr float default_RS = 0.1;
-		float holdMultiplier = 0.5;
+		static constexpr float default_RS = 0.1f;
+		float holdMultiplier = 0.5f;
 		uint32_t spi_speed = 16000000/8; // Default 2MHz
 		uint8_t _savedToff = 0;
 		SW_SPIClass * TMC_SW_SPI = nullptr;

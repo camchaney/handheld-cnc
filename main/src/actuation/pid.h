@@ -14,8 +14,8 @@ public:
 
 private:
 	float Kp, Ki, Kd;
-	float integral = 0.0;
-	float prevError = 0.0;
+	float integral = 0.0f;
+	float prevError = 0.0f;
 };
 
 #endif

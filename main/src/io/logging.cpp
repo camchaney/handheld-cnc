@@ -217,12 +217,12 @@ void parseGCodeFile(const String& sFilename) {
 					if (newPoint.z < activePath->minZ) {
 						activePath->minZ = newPoint.z;			// TODO: maybe not necessary (unused right now)
 					}
-					if (newPoint.z > 4.0) {
+					if (newPoint.z > 4.0f) {
 						// TODO: this is bandaid for shitty gcode! Remove this
-						newPoint.z = 4.0;
+						newPoint.z = 4.0f;
 					}
 					// if matThickness is set to 0 (drawing), then don't pierce!
-					if (matThickness == 0.0 && designType == FROM_FILE && newPoint.z < 0.0) newPoint.z = 0.0f;
+					if (matThickness == 0.0f && designType == FROM_FILE && newPoint.z < 0.0f) newPoint.z = 0.0f;
 					break;
 				// TODO: parse feedrate (F) and, for holes, retract height (R)
 				// case 'F':
@@ -317,7 +317,7 @@ void debugging(Point point1, Position pos) {
 	timeLastDebug = millis();
 
 	// Print debug data
-	Serial.printf("x:%f, y:%f, theta:%f\n", pose.x, pose.y, pose.yaw * 180.0 / PI);
+	Serial.printf("x:%f, y:%f, theta:%f\n", pose.x, pose.y, pose.yaw * 180.0f / PI);
 	Serial.printf("idx:%i, goal.x:%f,goal.y:%f,goal.z:%f\n", current_point_idx, point1.x, point1.y, point1.z);
 	Serial.printf("desPos.x:%f,desPos.y:%f,desPos.z:%f\n", pos.getX(), pos.getY(), pos.getZ());
 

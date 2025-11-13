@@ -10,6 +10,6 @@ float PIDController::compute(float error, float deltaTime) {
 }
 
 void PIDController::reset() {
-	integral = 0.0;
-	prevError = 0.0;
+	integral = 0.0f;
+	prevError = 0.0f;
 }

@@ -109,11 +109,13 @@ void doSensing() {
 
 		// Store sensor data for logging
 		// TODO: store the raw int and byte data instead and do twosComp in the decoder
-		logData[i].dx = dx;
-		logData[i].dy = dy;
-		logData[i].onSurface = data[i].isOnSurface;
-		logData[i].sq = data[i].SQUAL;
-		logData[i].rawDataSum = data[i].rawDataSum;
+		if (outputSDOn) {
+			logData[i].dx = dx;
+			logData[i].dy = dy;
+			logData[i].onSurface = data[i].isOnSurface;
+			logData[i].sq = data[i].SQUAL;
+			logData[i].rawDataSum = data[i].rawDataSum;
+		}
 	}
 
 	// Calculate angular velocities
@@ -150,14 +152,14 @@ void doSensing() {
 	// TODO: turn this into "matrix" math
 	float sinfy = sinf(pose.yaw);
 	float cosfy = cosf(pose.yaw);
-	estVel[0][0] = measVel[0][0]*cosfy-measVel[1][0]*sinfy + 0.5*estAngVel1*(lx*cosfy-(ly)*sinfy);
-	estVel[0][1] = measVel[0][1]*cosfy-measVel[1][1]*sinfy + 0.5*estAngVel1*(lx*cosfy+(ly)*sinfy);
-	estVel[0][2] = measVel[0][2]*cosfy-measVel[1][2]*sinfy + 0.5*estAngVel1*(-lx*cosfy-(ly)*sinfy);
-	estVel[0][3] = measVel[0][3]*cosfy-measVel[1][3]*sinfy + 0.5*estAngVel1*(-lx*cosfy+(ly)*sinfy);
-	estVel[1][0] = measVel[0][0]*sinfy+measVel[1][0]*cosfy + 0.5*estAngVel1*((ly)*cosfy+lx*sinfy);
-	estVel[1][1] = measVel[0][1]*sinfy+measVel[1][1]*cosfy + 0.5*estAngVel1*(-(ly)*cosfy+lx*sinfy);
-	estVel[1][2] = measVel[0][2]*sinfy+measVel[1][2]*cosfy + 0.5*estAngVel1*((ly)*cosfy-lx*sinfy);
-	estVel[1][3] = measVel[0][3]*sinfy+measVel[1][3]*cosfy + 0.5*estAngVel1*(-(ly)*cosfy-lx*sinfy);
+	estVel[0][0] = measVel[0][0]*cosfy-measVel[1][0]*sinfy + 0.5f*estAngVel1*(lx*cosfy-(ly)*sinfy);
+	estVel[0][1] = measVel[0][1]*cosfy-measVel[1][1]*sinfy + 0.5f*estAngVel1*(lx*cosfy+(ly)*sinfy);
+	estVel[0][2] = measVel[0][2]*cosfy-measVel[1][2]*sinfy + 0.5f*estAngVel1*(-lx*cosfy-(ly)*sinfy);
+	estVel[0][3] = measVel[0][3]*cosfy-measVel[1][3]*sinfy + 0.5f*estAngVel1*(-lx*cosfy+(ly)*sinfy);
+	estVel[1][0] = measVel[0][0]*sinfy+measVel[1][0]*cosfy + 0.5f*estAngVel1*((ly)*cosfy+lx*sinfy);
+	estVel[1][1] = measVel[0][1]*sinfy+measVel[1][1]*cosfy + 0.5f*estAngVel1*(-(ly)*cosfy+lx*sinfy);
+	estVel[1][2] = measVel[0][2]*sinfy+measVel[1][2]*cosfy + 0.5f*estAngVel1*((ly)*cosfy-lx*sinfy);
+	estVel[1][3] = measVel[0][3]*sinfy+measVel[1][3]*cosfy + 0.5f*estAngVel1*(-(ly)*cosfy-lx*sinfy);
 
 	// Simple average of linear velocities
 	float sumVelX = 0.0f;
@@ -196,7 +198,7 @@ void doSensing() {
 	distanceTraveled += dXY;
 	// Serial.printf("distanceTraveled: %.2f\n", distanceTraveled);
 
-	if (sensingTime > 1000 || sensingTime < 800) {
+	if (sensingTime > (dt+100) || sensingTime < (dt-100)) {
 		Serial.printf("%lu: sensing time = %lu\n", millis(), sensingTime);
 	}
 	// Write to SD card
@@ -229,10 +231,10 @@ void doSensingLinear() {
       calPos[1][i] = calPos[1][i] + measVel[1][i];
     }
 
-    // Sensor plotting
+	// Sensor plotting
 	for (int i = 0; i < ns; i++) {
 		float angle = 0.0f;
-		if (abs(calPos[0][i]) > abs(calPos[1][i])) {
+		if (fabsf(calPos[0][i]) > fabsf(calPos[1][i])) {
 			angle = atan2f(-calPos[1][i],calPos[0][i]);
 		} else {
 			angle = atan2f(calPos[0][i],calPos[1][i]);
@@ -240,9 +242,7 @@ void doSensingLinear() {
 		Serial.printf("%i: x:%.0f,\ty:%.0f,\tb:%.6f,\tsq:%i",i,calPos[0][i],calPos[1][i],angle,surfaceQuality[i]);
 		Serial.println();
 	}
-	Serial.println();
-
-	// TODO: add in calibration logging
+	Serial.println();	// TODO: add in calibration logging
 }
 
 void sensorPlotting() {
@@ -302,7 +302,7 @@ void calibrate() {
 	encoder.setEncoderHandler(nullHandler);
 	encoder.setClickHandler(onClickCalibrationAdvance);
 
-	float calDistance = 300.0;
+	float calDistance = 300.0f;
 	int currentRun = 0;
 	int numRuns = 5;
 	float tempCalScalar[2][ns] = {0.0f};
@@ -322,7 +322,7 @@ void calibrate() {
 			float progressAngle = (currentRun + 1) * (TWO_PI / numRuns);
 
 			screen->drawCircle(centerX, centerY, progressRadius, WHITE);
-			for (float rad = 0; rad < progressAngle; rad+=0.01) {
+			for (float rad = 0.0f; rad < progressAngle; rad+=0.01f) {
 				for (int i = 0; i < 3; i++) {
 					int x = centerX + (progressRadius-1+i) * sinf(rad);
 					int y = centerY - (progressRadius-1+i) * cosf(rad);
@@ -359,7 +359,7 @@ void calibrate() {
 			}
 			
 			for (int i = 0; i < ns; i++) {
-				float sensorDist = calDistance / (myDist(calPos[0][i],calPos[1][i],0,0));
+				float sensorDist = calDistance / (myDist(calPos[0][i],calPos[1][i],0.0f,0.0f));
 				float sensorRot = axis ? atan2f(calPos[0][i],calPos[1][i]) : atan2f(-calPos[1][i],calPos[0][i]);	// Cry : Crx
 				
 				Serial.printf("Cx/y:%f, Cr:%f\n",sensorDist,sensorRot);
@@ -376,7 +376,7 @@ void calibrate() {
 
 	Serial.println("Calibration results:");
 	for (int i = 0; i < ns; i++) {
-		float avgRot = (tempCalRot[0][i]+tempCalRot[1][i]) / 2;
+		float avgRot = (tempCalRot[0][i]+tempCalRot[1][i]) / 2.0f;
 		Serial.printf("\t%i: Cx:%f,Cy:%f, Crx:%f,Cry:%f, Cr:%f\n",
 			i,tempCalScalar[0][i],tempCalScalar[1][i],tempCalRot[0][i],tempCalRot[1][i],avgRot);
 	}
@@ -391,7 +391,7 @@ void calibrate() {
 		for (int i=0; i<ns; i++) {
 			cal[i].x = tempCalScalar[0][i];
 			cal[i].y = tempCalScalar[1][i];
-			cal[i].r = (tempCalRot[0][i]+tempCalRot[1][i]) / 2;
+			cal[i].r = (tempCalRot[0][i]+tempCalRot[1][i]) / 2.0f;
 		}
 		writeEepromCalibration();
 

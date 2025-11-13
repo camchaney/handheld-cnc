@@ -2,9 +2,9 @@
 
 // Load gCode path (pre-processed into a vector of GCodePoints)
 void TrajectoryGenerator::resetPath(Point& goal) {
-	goal = Point{0.0, 0.0, 0.0};
-	segmentTime = 0.0;
-	currentTime = 0.0;
+	goal = Point{0.0f, 0.0f, 0.0f};
+	segmentTime = 0.0f;
+	currentTime = 0.0f;
 	current_point_idx = 0;
 }
 	
@@ -26,12 +26,12 @@ void TrajectoryGenerator::update(long deltaTime, Point& goal) {
 			float f = path.points[current_point_idx].f * feedrateBoost;
 			// TODO: known bug where interpolation gets skipped if feedrateBoost is changed mid-path
 	
-			float segmentDistance = sqrt(
-				pow(path.points[current_point_idx + 1].x - path.points[current_point_idx].x, 2) +
-				pow(path.points[current_point_idx + 1].y - path.points[current_point_idx].y, 2) +
-				pow(path.points[current_point_idx + 1].z - path.points[current_point_idx].z, 2)
+			float segmentDistance = sqrtf(
+				powf(path.points[current_point_idx + 1].x - path.points[current_point_idx].x, 2.0f) +
+				powf(path.points[current_point_idx + 1].y - path.points[current_point_idx].y, 2.0f) +
+				powf(path.points[current_point_idx + 1].z - path.points[current_point_idx].z, 2.0f)
 			);
-			if (segmentDistance == 0.0) {
+			if (segmentDistance == 0.0f) {
 				// Serial.println("Segment distance is zero");
 				current_point_idx++;
 				return;
@@ -50,7 +50,7 @@ void TrajectoryGenerator::update(long deltaTime, Point& goal) {
 				// TODO: add feedrate and feature type to goal
 				return;
 			} else {
-				currentTime = 0.0;			// reset time for next segment
+				currentTime = 0.0f;			// reset time for next segment
 				current_point_idx++;
 				// Serial.printf("Current point index: %i\n", current_point_idx);
 			}

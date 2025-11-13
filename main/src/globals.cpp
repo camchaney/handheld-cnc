@@ -47,21 +47,21 @@ float dXY = 0.0f;							// distance traveled in one step (mm)
 float distanceTraveled = 0.0f;				// distance traveled by the router (mm)
 // Kinematics
 float feedrate = feedrate_default;						// speed of tracking (mm/s)			TODO: make this modifiable (and change units to mm)
-float feedrateBoost = 1;								// feedrate boost factor (i.e. 1.0 = no boost, 2.0 = double speed, etc.)
+float feedrateBoost = 1.0f;								// feedrate boost factor (i.e. 1.0 = no boost, 2.0 = double speed, etc.)
 
 // Mode select
 bool plottingOn = false;			// plot values
 bool debuggingOn = false;			// print debug statements
 bool stopwatchOn = false;
-bool outputSerialOn = false;				// output data to serial
+bool outputSerialOn = false;		// output data to serial
 bool outputSDOn = true;				// output data to SD card
 int designOrCalibrate = 0;			// choose design or calibrate (0 or 1)
 int acceptCal = 0;					// accept calibration or not
 int designPreset = 0;				// choose the design
-int pauseSelection = 0;					// pause menu selection
+int pauseSelection = 0;				// pause menu selection
 
 // Material properties
-float matThickness = 0.0;
+float matThickness = 0.0f;
 
 // Timing variables
 long unsigned totalLoopTime = 0;

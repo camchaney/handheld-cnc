@@ -18,10 +18,10 @@ const int SCROLL_SPEED = 150;    // Time between each scroll step (ms)
 const int CHARS_TO_DISPLAY = 12; // Max characters that fit on screen with text size 2
 
 float exponentialSkew(float x) {
-	if (x > 0) {
-		return x + (1/exp(x));
-	} else if (x < 0) {
-		return -(x + (1/exp(x)));
+	if (x > 0.0f) {
+		return x + (1.0f/expf(x));
+	} else if (x < 0.0f) {
+		return -(x + (1.0f/expf(x)));
 	}
 	return 0.0f;
 }
@@ -33,24 +33,24 @@ uint16_t rgbTo565(uint8_t r, uint8_t g, uint8_t b) {
 
 // Gradient function: returns a packed 16-bit RGB565 color
 uint16_t getGradientColor(float value, float maxValue) {
-	if (value < 0) value = 0;
+	if (value < 0.0f) value = 0.0f;
 	if (value > maxValue) value = maxValue;
 
-	const float midValue = 0.5;
+	const float midValue = 0.5f;
 	float ratio = value / maxValue;
 	uint8_t r, g, b;
 
 	if (ratio <= midValue) {
 		// Green to yellow
 		float t = ratio / midValue;
-		r = (uint8_t)(255 * t);  // 0 -> 255
+		r = (uint8_t)(255.0f * t);  // 0 -> 255
 		g = 255;
 		b = 0;
 	} else {
 		// Yellow to red
 		float t = (ratio - midValue) / midValue;
 		r = 255;
-		g = (uint8_t)(255 - (255 * t));  // 255 -> 0
+		g = (uint8_t)(255.0f - (255.0f * t));  // 255 -> 0
 		b = 0;
 	}
 
@@ -108,7 +108,7 @@ void drawShape() {
 			// sin
 			scale = size / PI;
 			for (int y = -size; y <= size; y++) {
-				x = (int16_t) (scale*sin(y/scale));
+				x = (int16_t) (scale*sinf(y/scale));
 				screen->drawPixel(centerX+x, centerY+y, WHITE);
 			}
 			break;
@@ -147,7 +147,7 @@ void drawShape() {
 			screen->drawLine(centerX, centerY-size, centerX-size, centerY, WHITE);
 			scale = size / PI;
 			for (int y = -size; y <= size; y++) {
-				x = (int16_t) (scale*sin(y/scale));
+				x = (int16_t) (scale*sinf(y/scale));
 				screen->drawPixel(centerX+x, centerY+y, WHITE);
 			}
 			break;
@@ -172,12 +172,12 @@ void drawShape() {
 			screen->drawCircle(centerX, centerY, dot_size, WHITE);
 			break;
 		// 	// hexagon
-		// 	screen->drawLine(centerX, centerY+size, centerX+size*cos(M_PI/6), centerY-size*sin(M_PI/6), WHITE);
-		// 	screen->drawLine(centerX+size*cos(M_PI/6), centerY-size*sin(M_PI/6), centerX+size*cos(M_PI/6), centerY-size*sin(M_PI/6), WHITE);
-		// 	screen->drawLine(centerX+size*cos(M_PI/6), centerY-size*sin(M_PI/6), centerX, centerY-size, WHITE);
-		// 	screen->drawLine(centerX, centerY-size, centerX-size*cos(M_PI/6), centerY-size*sin(M_PI/6), WHITE);
-		// 	screen->drawLine(centerX-size*cos(M_PI/6), centerY-size*sin(M_PI/6), centerX-size*cos(M_PI/6), centerY+size*sin(M_PI/6), WHITE);
-		// 	screen->drawLine(centerX-size*cos(M_PI/6), centerY+size*sin(M_PI/6), centerX, centerY+size, WHITE);
+		// 	screen->drawLine(centerX, centerY+size, centerX+size*cosf(M_PI/6), centerY-size*sinf(M_PI/6), WHITE);
+		// 	screen->drawLine(centerX+size*cosf(M_PI/6), centerY-size*sinf(M_PI/6), centerX+size*cosf(M_PI/6), centerY-size*sinf(M_PI/6), WHITE);
+		// 	screen->drawLine(centerX+size*cosf(M_PI/6), centerY-size*sinf(M_PI/6), centerX, centerY-size, WHITE);
+		// 	screen->drawLine(centerX, centerY-size, centerX-size*cosf(M_PI/6), centerY-size*sinf(M_PI/6), WHITE);
+		// 	screen->drawLine(centerX-size*cosf(M_PI/6), centerY-size*sinf(M_PI/6), centerX-size*cosf(M_PI/6), centerY+size*sinf(M_PI/6), WHITE);
+		// 	screen->drawLine(centerX-size*cosf(M_PI/6), centerY+size*sinf(M_PI/6), centerX, centerY+size, WHITE);
 		// 	break;
 	}
 }
@@ -361,14 +361,14 @@ void drawFixedUI() {
 	
 	// Draw bounds rectangle
 	screen->drawRect(
-		centerX - rectangleWidth/2,
-		centerY - rectangleWidth/2,
+		centerX - rectangleWidth/2.0f,
+		centerY - rectangleWidth/2.0f,
 		rectangleWidth,
 		rectangleWidth,
 		WHITE
 	);
 
-	float maxDriftAngle = TWO_PI * tanh(maxDrift / maxDrift);
+	float maxDriftAngle = TWO_PI * tanhf(maxDrift / maxDrift);
 	// TODO: add more markers for fractions of max drift (i.e. 1/10, 2/10, etc.)
 	for (int j = 0; j < 6; j++) {
 		int x = centerX + (driftRadius-4+j) * sinf(maxDriftAngle);
@@ -378,16 +378,16 @@ void drawFixedUI() {
 }
 
 void drawUI(Position desPosition, float progress, uint8_t i) {
-	float padding = 6;
-	float windowSize = rectangleWidth - 2*padding;
+	float padding = 6.0f;
+	float windowSize = rectangleWidth - 2.0f*padding;
 	int progressRadius = (screen->width()/2) - 10;
 	int driftRadius = (screen->width()/2) - 20;
 	float progressAngle = progress * TWO_PI;
-	float driftAngle = TWO_PI * tanh(distanceTraveled * driftRate / maxDrift);
-	float driftColorswitch = 1.2 * maxDrift;
+	float driftAngle = TWO_PI * tanhf(distanceTraveled * driftRate / maxDrift);
+	float driftColorswitch = 1.2f * maxDrift;
 	
-	float dx = mapF(desPosition.getX(), -xRange/2, xRange/2, -windowSize/2, windowSize/2);
-	float dy = -mapF(desPosition.getY(), -yRange/2, yRange/2, -windowSize/2, windowSize/2);
+	float dx = mapF(desPosition.getX(), -xRange/2.0f, xRange/2.0f, -windowSize/2.0f, windowSize/2.0f);
+	float dy = -mapF(desPosition.getY(), -yRange/2.0f, yRange/2.0f, -windowSize/2.0f, windowSize/2.0f);
 
 	switch (i%5) {
 		case 0:
