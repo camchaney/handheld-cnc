@@ -8,6 +8,7 @@
 #include <SdFat.h>
 #include <Arduino_GFX_Library.h>
 #include <EncoderButton.h>
+#include <DMAChannel.h>
 #include "ui/HandleButtons.h"
 #include "config.h"
 #include "types.h"
@@ -91,5 +92,11 @@ extern elapsedMicros runTimer;
 extern elapsedMicros filemicros;
 extern elapsedMillis speedRunTimer;
 extern uint8_t iter;
+
+extern IntervalTimer sensorTimer;
+extern DMAChannel dmaSPI;
+extern volatile bool sensorDataReady;
+extern volatile uint32_t sensorStartTime;
+extern PMW3360_DATA motionData[4];
 
 #endif

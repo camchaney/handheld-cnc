@@ -41,6 +41,7 @@ void setup() {
 	sensorSetup();
 	motorSetup(); 
 	driverSetup();
+	setupSensorTimer();
 	
 	Serial.print("Initializing SD card...");
 	if (!sd.begin(SdioConfig(FIFO_SDIO))) {
@@ -56,16 +57,16 @@ void setup() {
 }
 
 void loop() {
-	// Sensing
-    if(micros() - timeLastPoll >= dt) {
-        sensingTime = micros() - timeLastPoll;
-        doSensing();
-    }
+	// Process sensor data
+	if (sensorDataReady) {
+		doSensing();
+	}
 
 	// Run steppers
 	stepperR.run();
 	stepperL.run();
 	stepperZ.run();
+	
 	encoder.update();
 	handleButtons.update();
 
@@ -86,7 +87,6 @@ void loop() {
 	}
 
 	// Cutting
-	// handleChickenHead();
 	if (runTimer >= dtControl) {
 		// TODO: tighten this control loop
 		runTimer = 0;

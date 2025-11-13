@@ -71,52 +71,59 @@ int16_t convTwosComp(int16_t value) {
 	}
 }
 
-void doSensing() {
-	// TODO: fix how sensingTime is implemented. Currently, on the first iteration, sensingTime
-	// 	is incredibly large because timeLastPoll is either 0 or set from a while ago. This usually
-	// 	isn't a huge issue because the router starts from rest, but there are certain cases where
-	//  this isn't true.
-	sensingTime = micros() - timeLastPoll;
-	timeLastPoll = micros();
-	unsigned long logTime = filemicros;
+void setupSensorTimer() {
+	sensorTimer.begin(sensorTimerISR, dt);
+	sensorTimer.priority(128);
+}
 
-	// Collect sensor data
-	PMW3360_DATA data[ns];
-	SensorData logData[ns];
-	for (int i = 0; i < ns; i++) {
-		data[i] = sensors[i].readBurst();
+void sensorTimerISR() {
+	if (sensorDataReady) {
+		return;
 	}
+	
+	sensorStartTime = micros();
+	readAllSensors();
+	sensorDataReady = true;
+}
 
-	// Process sensor data
+void readAllSensors() {
 	for (int i = 0; i < ns; i++) {
-		float dx = -convTwosComp(data[i].dx);
-		float dy = convTwosComp(data[i].dy);
-		surfaceQuality[i] = data[i].SQUAL;
-		onSurface[i] = data[i].isOnSurface;
+		motionData[i] = sensors[i].readBurst();
+	}
+}
+
+void doSensing() {
+	if (!sensorDataReady) return;
+	
+	sensorDataReady = false;
+	sensingTime = micros() - sensorStartTime;
+	unsigned long logTime = filemicros;
+	
+	SensorData logData[ns];
+	
+	for (int i = 0; i < ns; i++) {
+		float dx = -convTwosComp(motionData[i].dx);
+		float dy = convTwosComp(motionData[i].dy);
+		surfaceQuality[i] = motionData[i].SQUAL;
+		onSurface[i] = motionData[i].isOnSurface;
 		
-		// TODO: find better way to check for bad readings. surfaceQuality does not seem to be reliable
 		if (onSurface[i]) {
 			float sinfr = sinf(cal[i].r);
 			float cosfr = cosf(cal[i].r);
 			measVel[0][i] = cal[i].x * (dx*cosfr - dy*sinfr) / sensingTime;
 			measVel[1][i] = cal[i].y * (dx*sinfr + dy*cosfr) / sensingTime;
 		} else {
-			// TODO: why are we evaluating the sensor validity below instead of here?
 			measVel[0][i] = NAN;
 			measVel[1][i] = NAN;
-			// Serial.printf("Sensor %i is not on surface\n", i);
 		}
-
-		// Store sensor data for logging
-		// TODO: store the raw int and byte data instead and do twosComp in the decoder
+		
 		logData[i].dx = dx;
 		logData[i].dy = dy;
-		logData[i].onSurface = data[i].isOnSurface;
-		logData[i].sq = data[i].SQUAL;
-		logData[i].rawDataSum = data[i].rawDataSum;
+		logData[i].onSurface = motionData[i].isOnSurface;
+		logData[i].sq = motionData[i].SQUAL;
+		logData[i].rawDataSum = motionData[i].rawDataSum;
 	}
-
-	// Calculate angular velocities
+	
 	estAngVel[0] = (measVel[0][2] - measVel[0][0])/ly;
 	estAngVel[1] = (measVel[0][2] - measVel[0][1])/ly;
 	estAngVel[2] = (measVel[0][3] - measVel[0][0])/ly;
@@ -125,19 +132,17 @@ void doSensing() {
 	estAngVel[5] = (measVel[1][1] - measVel[1][2])/lx;
 	estAngVel[6] = (measVel[1][3] - measVel[1][0])/lx;
 	estAngVel[7] = (measVel[1][3] - measVel[1][2])/lx;
-
-	// Average angular velocities
+	
 	float sumAngVel = 0.0f;
 	float estAngVel1 = 0.0f;
-	int num_good_calcs = 0;				// number of measurements that are valid
+	int num_good_calcs = 0;
 	for (int i = 0; i < 8; i++) {
-		// filter out bad measurements
 		if (!isnan(estAngVel[i])) {
 			sumAngVel = sumAngVel + estAngVel[i];
 			num_good_calcs++;
 		}
 	}
-
+	
 	if (num_good_calcs == 0) {
 		valid_sensors = false;
 		return;
@@ -145,9 +150,7 @@ void doSensing() {
 		valid_sensors = true;
 		estAngVel1 = sumAngVel / num_good_calcs;
 	}
-
-	// Body position estimation
-	// TODO: turn this into "matrix" math
+	
 	float sinfy = sinf(pose.yaw);
 	float cosfy = cosf(pose.yaw);
 	estVel[0][0] = measVel[0][0]*cosfy-measVel[1][0]*sinfy + 0.5*estAngVel1*(lx*cosfy-(ly)*sinfy);
@@ -158,49 +161,37 @@ void doSensing() {
 	estVel[1][1] = measVel[0][1]*sinfy+measVel[1][1]*cosfy + 0.5*estAngVel1*(-(ly)*cosfy+lx*sinfy);
 	estVel[1][2] = measVel[0][2]*sinfy+measVel[1][2]*cosfy + 0.5*estAngVel1*((ly)*cosfy-lx*sinfy);
 	estVel[1][3] = measVel[0][3]*sinfy+measVel[1][3]*cosfy + 0.5*estAngVel1*(-(ly)*cosfy-lx*sinfy);
-
-	// Simple average of linear velocities
+	
 	float sumVelX = 0.0f;
 	float sumVelY = 0.0f;
 	float estVel1[2] = {0.0f, 0.0f};
 	num_good_calcs = 0;
-	for (int i = 0; i<ns; i++) {
-		// filter out bad measurements
+	for (int i = 0; i < ns; i++) {
 		if (!isnan(estVel[0][i]) && !isnan(estVel[1][i])) {
 			sumVelX = sumVelX + estVel[0][i];
 			sumVelY = sumVelY + estVel[1][i];
 			num_good_calcs++;
 		}
 	}
+	
 	if (num_good_calcs == 0) {
-		// TODO: make this prompt a re-zeroing
-		// Serial.print("Sensors are poo-poo!");
 		valid_sensors = false;
 		return;
 	} else {
 		valid_sensors = true;
-		// (TODO: figure out deeper cause) Acounting for weird rotation
-		// estVel1[0] = (sumVelX / ns) - estAngVel1*(xSensorOffset*sinf(pose.yaw) + ySensorOffset*cosf(pose.yaw));
-		// estVel1[1] = (sumVelY / ns) + estAngVel1*(xSensorOffset*cosf(pose.yaw) - ySensorOffset*sinf(pose.yaw));
 		estVel1[0] = sumVelX / num_good_calcs;
 		estVel1[1] = sumVelY / num_good_calcs;
 	}
-
-	// Integrate to get position and orientation
+	
 	pose.yaw = pose.yaw + estAngVel1*sensingTime;
 	pose.x = pose.x + estVel1[0]*sensingTime;
 	pose.y = pose.y + estVel1[1]*sensingTime;
-
+	
 	float distRatio = 0.6f;
 	dXY = distRatio*dXY + (1-distRatio)*sqrtf(estVel1[0]*estVel1[0] + estVel1[1]*estVel1[1]) * sensingTime;
 	distanceTraveled += dXY;
-	// Serial.printf("distanceTraveled: %.2f\n", distanceTraveled);
-
-	if (sensingTime > 1000 || sensingTime < 800) {
-		Serial.printf("%lu: sensing time = %lu\n", millis(), sensingTime);
-	}
-	// Write to SD card
-	if (outputSDOn) {
+	
+	if (outputSDOn && logFile) {
 		writeSensorData(logTime, logData, sensingTime);
 	}
 }
