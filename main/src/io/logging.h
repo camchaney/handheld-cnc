@@ -80,10 +80,10 @@ struct AuxPacket {
 
 // Serial logging functions
 void handleSerial();
-void outputSerial(Point goal, float toolPos, float desPos);
+void outputSerial(RouterPose pose, Point goal, float toolPos, float desPos);
 
 // Debugging functions
-void debugging(Point point1, Position pos);
+void debugging(RouterPose pose, Point point1, Position pos);
 void debugging(const char* format, ...);
 void debugging(const __FlashStringHelper* format, ...);
 void stopwatch();
@@ -101,7 +101,7 @@ void writeFileHeader(const char* designName, uint16_t numPaths);
 // void writePathInfo(uint16_t pathIndex, uint8_t featureType);
 void writePathPoint(uint16_t pathIndex, uint16_t pointIndex, Point point);
 void writeSensorData(uint32_t time,  SensorData sensorArray[4], uint32_t dt);
-void writeAuxData(Point goal, float toolX, float toolY, float toolZ, Position desPos);
+void writeAuxData(RouterPose pose, Point goal, float toolX, float toolY, float toolZ, Position desPos);
 void closeSDFile();
 void logPath();
 

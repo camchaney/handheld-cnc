@@ -9,6 +9,9 @@ Sensor configuration:
 Angle signage: +CCW
 */
 
+// Create an IntervalTimer object
+IntervalTimer sensorTimer;
+
 // Timing variables
 static long unsigned timeLastPlot = 0;
 
@@ -18,6 +21,7 @@ static bool onSurface[4] = {1,1,1,1};		// 1 if sensor is on surface, 0 otherwise
 static float estVel[2][4] = {{0.0f,0.0f,0.0f,0.0f},
 							{0.0f,0.0f,0.0f,0.0f}};
 static float estAngVel[8] = {0.0f,0.0f,0.0f,0.0f,0.0f,0.0f};
+static float dXY = 0.0f;
 
 void sensorSetup() {
 	int sensorPins[4] = {SS0, SS1, SS2, SS3};
@@ -61,6 +65,35 @@ void sensorSetup() {
 		screen->setCursor(xStart, yStart + i * size * 10);
 		screen->println(text);
 	}
+
+	// TODO: place this somewhere else more appropriate. It should only start at the beginning of a design
+	// startSensing();
+}
+
+void startSensing() {
+	// Start the sensor reading timer
+	sensorTimer.begin(doSensing, dt);
+}
+
+void endSensing() {
+	// Stop the sensor reading timer
+	sensorTimer.end();
+}
+
+void resetSensorInfo() {
+	dXY = 0.0f;
+	
+	noInterrupts();
+	// Reset position tracking variables
+	// TODO: reset pose_isr properly - maybe make a function for RouterPose?
+	pose_isr.x = 0.0f;
+	pose_isr.y = 0.0f;
+	pose_isr.yaw = 0.0f;
+	distanceTraveled_isr = 0.0f;
+
+	// Reset sensor variables
+	valid_sensors_isr = true;
+	interrupts();
 }
 
 int16_t convTwosComp(int16_t value) {
@@ -76,9 +109,9 @@ void doSensing() {
 	// 	is incredibly large because timeLastPoll is either 0 or set from a while ago. This usually
 	// 	isn't a huge issue because the router starts from rest, but there are certain cases where
 	//  this isn't true.
-	sensingTime = micros() - timeLastPoll;
-	timeLastPoll = micros();
-	unsigned long logTime = filemicros;
+	// sensingTime = micros() - timeLastPoll;
+	// timeLastPoll = micros();
+	// unsigned long logTime = filemicros;
 
 	// Collect sensor data
 	PMW3360_DATA data[ns];
@@ -109,11 +142,11 @@ void doSensing() {
 
 		// Store sensor data for logging
 		// TODO: store the raw int and byte data instead and do twosComp in the decoder
-		logData[i].dx = dx;
-		logData[i].dy = dy;
-		logData[i].onSurface = data[i].isOnSurface;
-		logData[i].sq = data[i].SQUAL;
-		logData[i].rawDataSum = data[i].rawDataSum;
+		// logData[i].dx = dx;
+		// logData[i].dy = dy;
+		// logData[i].onSurface = data[i].isOnSurface;
+		// logData[i].sq = data[i].SQUAL;
+		// logData[i].rawDataSum = data[i].rawDataSum;
 	}
 
 	// Calculate angular velocities
@@ -139,17 +172,17 @@ void doSensing() {
 	}
 
 	if (num_good_calcs == 0) {
-		valid_sensors = false;
+		valid_sensors_isr = false;
 		return;
 	} else {
-		valid_sensors = true;
+		valid_sensors_isr = true;
 		estAngVel1 = sumAngVel / num_good_calcs;
 	}
 
 	// Body position estimation
 	// TODO: turn this into "matrix" math
-	float sinfy = sinf(pose.yaw);
-	float cosfy = cosf(pose.yaw);
+	float sinfy = sinf(pose_isr.yaw);
+	float cosfy = cosf(pose_isr.yaw);
 	estVel[0][0] = measVel[0][0]*cosfy-measVel[1][0]*sinfy + 0.5*estAngVel1*(lx*cosfy-(ly)*sinfy);
 	estVel[0][1] = measVel[0][1]*cosfy-measVel[1][1]*sinfy + 0.5*estAngVel1*(lx*cosfy+(ly)*sinfy);
 	estVel[0][2] = measVel[0][2]*cosfy-measVel[1][2]*sinfy + 0.5*estAngVel1*(-lx*cosfy-(ly)*sinfy);
@@ -175,10 +208,10 @@ void doSensing() {
 	if (num_good_calcs == 0) {
 		// TODO: make this prompt a re-zeroing
 		// Serial.print("Sensors are poo-poo!");
-		valid_sensors = false;
+		valid_sensors_isr = false;
 		return;
 	} else {
-		valid_sensors = true;
+		valid_sensors_isr = true;
 		// (TODO: figure out deeper cause) Acounting for weird rotation
 		// estVel1[0] = (sumVelX / ns) - estAngVel1*(xSensorOffset*sinf(pose.yaw) + ySensorOffset*cosf(pose.yaw));
 		// estVel1[1] = (sumVelY / ns) + estAngVel1*(xSensorOffset*cosf(pose.yaw) - ySensorOffset*sinf(pose.yaw));
@@ -187,22 +220,23 @@ void doSensing() {
 	}
 
 	// Integrate to get position and orientation
-	pose.yaw = pose.yaw + estAngVel1*sensingTime;
-	pose.x = pose.x + estVel1[0]*sensingTime;
-	pose.y = pose.y + estVel1[1]*sensingTime;
+	pose_isr.yaw = pose_isr.yaw + estAngVel1*sensingTime;
+	pose_isr.x = pose_isr.x + estVel1[0]*sensingTime;
+	pose_isr.y = pose_isr.y + estVel1[1]*sensingTime;
 
 	float distRatio = 0.6f;
 	dXY = distRatio*dXY + (1-distRatio)*sqrtf(estVel1[0]*estVel1[0] + estVel1[1]*estVel1[1]) * sensingTime;
-	distanceTraveled += dXY;
-	// Serial.printf("distanceTraveled: %.2f\n", distanceTraveled);
+	distanceTraveled_isr += dXY;
 
-	if (sensingTime > 1000 || sensingTime < 800) {
-		Serial.printf("%lu: sensing time = %lu\n", millis(), sensingTime);
-	}
+	// if (sensingTime > 1000 || sensingTime < 800) {
+	// 	Serial.printf("%lu: sensing time = %lu\n", millis(), sensingTime);
+	// }
 	// Write to SD card
-	if (outputSDOn) {
-		writeSensorData(logTime, logData, sensingTime);
-	}
+	// TODO: re-enable SD logging. This will need to be implemented alongside a buffer to store sensor data outside
+	// 		of the sensing interrupt.
+	// if (outputSDOn) {
+	// 	writeSensorData(logTime, logData, sensingTime);
+	// }
 }
 
 void doSensingLinear() {

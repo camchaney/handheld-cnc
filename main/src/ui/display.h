@@ -18,7 +18,7 @@ void updateFileList();
 void handleFileSelection();
 void drawCenteredText(const char* text, int size);
 void drawFixedUI();
-void drawUI(Position desPosition, float progress, uint8_t i);
-void updateUI(Position desPosition, float progress);
+void drawUI(Position desPosition, float progress, uint8_t i, float distanceTraveled);
+void updateUI(Position desPosition, float progress, float distanceTraveled);
 
 #endif

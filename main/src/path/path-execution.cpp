@@ -30,7 +30,7 @@ bool checkEndstops() {
 	return true;
 }
 
-void handleChickenHead() {
+void handleChickenHead(RouterPose pose) {
 	// If the chicken head is pressed...lol jk
 	// Using the pose information, I want to move the router so that it is always kept at (0,0,0)
 	float xDes = -(pose.x*cosf(pose.yaw)+pose.y*sinf(pose.yaw));
@@ -42,7 +42,8 @@ void handleChickenHead() {
 	cartesianToMotor(desPos);
 }
 
-void handleCutting(long deltaTime) {
+void handleCutting(RouterPose pose, long deltaTime, float distanceTraveled, bool valid_sensors) {
+	// Serial.printf("distanceTraveled: %.2f\n", distanceTraveled);
 	// Start of cutting Logic
 	trajectory.update(deltaTime, goal);			// update goal point
 
@@ -112,14 +113,15 @@ void handleCutting(long deltaTime) {
 	}
 
 	// Update UI
-	updateUI(desPos, (float)current_point_idx/(float)path.numPoints);
+	updateUI(desPos, (float)current_point_idx/(float)path.numPoints, distanceTraveled);
 
 	// Path logging
 	// TODO: make this more clean (without pass by reference)
 	float toolX, toolY, toolZ;
 	motorToCartesian(toolX, toolY, toolZ);
-	if (outputSDOn)	writeAuxData(goal, toolX, toolY, toolZ, desPos);
+	// TODO: make logging work for sensor interrupts
+	// if (outputSDOn)	writeAuxData(pose, goal, toolX, toolY, toolZ, desPos);
 
 	// Debugging
-	if (debuggingOn) debugging(goal, desPos);
+	if (debuggingOn) debugging(pose, goal, desPos);
 }

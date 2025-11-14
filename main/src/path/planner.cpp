@@ -66,6 +66,9 @@ void TrajectoryGenerator::update(long deltaTime, Point& goal) {
 
 	// // Make sure tool is raised after path is finished
 	// while (stepperZ.distanceToGo() != 0) stepperZ.run();
+
+	// Stop sensing
+	endSensing();
 	
 	// Reset the path accordingly
 	// TODO: make this more clean/robust and remove redudant resets

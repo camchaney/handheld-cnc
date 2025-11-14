@@ -289,7 +289,8 @@ void encoderDesignSelect() {
 
 	// Reset pose
 	workspaceZeroXY();
-	distanceTraveled = 0.0f;
+	resetSensorInfo();
+	startSensing();
 
 	// Reset cutting path
 	running = true;

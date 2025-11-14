@@ -49,7 +49,7 @@ float signedDist(RouterPose rPose, Point p) {
 	return (A * p.x + B * p.y + C) / sqrt(pow(A, 2) + pow(B, 2));
 }
 
-float angleFrom(Point a, Point b) {
+float angleFrom(Point a, Point b, RouterPose pose) {
 	// Returns the angle (rads) between the gantry and the 
 	// line connecting points a and b.
 	float th1 = principalAngleRad(atan2f(b.y - a.y, b.x - a.x));
@@ -68,7 +68,7 @@ float angleFrom(Point a, Point b) {
 	return abs(th1 - th2);
 }
 
-int direction(Point g, Point n) {
+int direction(RouterPose pose, Point g, Point n) {
 	// Returns the direction of the path at the given orientation
 	// 1 - forward
 	// -1 - backward

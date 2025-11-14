@@ -56,13 +56,18 @@ void setup() {
 }
 
 void loop() {
-	// Sensing
-    if(micros() - timeLastPoll >= dt) {
-        sensingTime = micros() - timeLastPoll;
-        doSensing();
-    }
+	RouterPose pose_backup;
+	float distanceTraveled_backup;
+	bool valid_sensors_backup;
 
-	// Run steppers
+	// Get sensor and pose information from interrupts
+	noInterrupts();
+	memcpy(&pose_backup, (const void*)&pose_isr, sizeof(pose_backup));
+	distanceTraveled_backup = distanceTraveled_isr;
+	valid_sensors_backup = valid_sensors_isr;
+	interrupts();
+
+	// Run motors and update inputs
 	stepperR.run();
 	stepperL.run();
 	stepperZ.run();
@@ -90,7 +95,7 @@ void loop() {
 	if (runTimer >= dtControl) {
 		// TODO: tighten this control loop
 		runTimer = 0;
-		handleCutting(dtControl);		// TODO: make deltaTime a variable
+		handleCutting(pose_backup, dtControl, distanceTraveled_backup, valid_sensors_backup);		// TODO: make deltaTime a variable
 	}
 
 	// Debugging

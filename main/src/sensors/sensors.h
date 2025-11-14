@@ -9,6 +9,9 @@
 #include "../math/geometry.h"
 
 void sensorSetup();
+void startSensing();
+void endSensing();
+void resetSensorInfo();
 void doSensing();
 void doSensingLinear();
 void sensorPlotting();

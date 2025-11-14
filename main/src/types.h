@@ -49,9 +49,9 @@ typedef enum Feature {
 
 // Router pose
 typedef struct RouterPose {
-	float x;			// x position
-	float y;			// y position
-	float yaw;			// orientation
+	float x = 0.0f;			// x position
+	float y = 0.0f;			// y position
+	float yaw = 0.0f;			// orientation
 	// Future additions like velocity, acceleration, etc.
 } RouterPose;
 

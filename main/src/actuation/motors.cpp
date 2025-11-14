@@ -195,8 +195,6 @@ void machineZeroXY() {
 	stepperL.setAcceleration(maxAccelAB);
 	stepperR.setCurrentPosition(0);
 	stepperL.setCurrentPosition(0);
-
-	pose = {0.0f};
 }
 
 void workspaceZeroZ() {
@@ -344,9 +342,6 @@ void workspaceZeroXY() {
 	while (stepperZ.distanceToGo() != 0) {
 		stepperZ.run();
 	}
-
-	// Reset router pose
-	pose = {0.0f};
 }
 
 void plungeZ(float zPos) {

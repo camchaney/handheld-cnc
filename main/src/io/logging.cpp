@@ -268,7 +268,7 @@ void parseGCodeFile(const String& sFilename) {
 }
 
 // Write to Serial ------------------------------------------------------
-void outputSerial(Point goal, float toolPos, float desPos) {
+void outputSerial(RouterPose pose, Point goal, float toolPos, float desPos) {
 	if(millis() - timeLastOutput >= dtOutput) {
 		timeLastOutput = millis();
 
@@ -296,7 +296,7 @@ void outputSerial(Point goal, float toolPos, float desPos) {
 	}
 }
 
-void debugging(Point point1, Position pos) {
+void debugging(RouterPose pose, Point point1, Position pos) {
 	// TODO: make this sequential timing work better
 	void* currentCaller = __builtin_return_address(0);
     if(millis() - timeLastDebug < dtDebug) {
@@ -512,7 +512,7 @@ void writeSensorData(uint32_t time,  SensorData sensorArray[ns], uint32_t dt) {
 }
 
 // Write auxilliary data to SD card for datalogging
-void writeAuxData(Point goal, float toolX, float toolY, float toolZ, Position desPos) {
+void writeAuxData(RouterPose pose, Point goal, float toolX, float toolY, float toolZ, Position desPos) {
 	if (millis() - timeLastOutputSD >= dtOutputSD) {
 		timeLastOutputSD = millis();
 		

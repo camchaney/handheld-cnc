@@ -29,7 +29,7 @@ extern SdFat sd;
 extern State state;
 extern CutState cutState;
 extern bool running;
-extern bool valid_sensors;
+extern volatile bool valid_sensors_isr;
 extern float motorPosX;
 extern DesignType designType;
 
@@ -47,11 +47,10 @@ extern int totalFiles;
 extern String fileList[MAX_FILES];
 
 // Position tracking
-extern RouterPose pose;
+extern volatile RouterPose pose_isr;
+extern volatile float distanceTraveled_isr;
 extern float measVel[2][4];
 extern float calPos[2][4];
-extern float dXY;
-extern float distanceTraveled;
 
 // Calibration data
 extern CalParams cal[4];

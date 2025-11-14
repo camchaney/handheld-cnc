@@ -18,7 +18,7 @@ SdFat sd;
 State state = POWER_ON;
 CutState cutState = NOT_CUT_READY;
 bool running = false;
-bool valid_sensors = true;
+volatile bool valid_sensors_isr = true;
 DesignType designType = PRESET;
 
 // Path data
@@ -35,7 +35,8 @@ int totalFiles = 0;
 String fileList[MAX_FILES];
 
 // Position tracking
-RouterPose pose = {0.0f};
+volatile RouterPose pose_isr = {0.0f};
+volatile float distanceTraveled_isr = 0.0f;				// distance traveled by the router (mm)
 float measVel[2][4] = {{0.0f,0.0f,0.0f,0.0f},
 						{0.0f,0.0f,0.0f,0.0f}};
 
@@ -43,8 +44,7 @@ float measVel[2][4] = {{0.0f,0.0f,0.0f,0.0f},
 float calPos[2][4] = {{0.0f,0.0f,0.0f,0.0f},
 						{0.0f,0.0f,0.0f,0.0f}};		// used for calibration
 CalParams cal[4];
-float dXY = 0.0f;							// distance traveled in one step (mm)
-float distanceTraveled = 0.0f;				// distance traveled by the router (mm)
+
 // Kinematics
 float feedrate = feedrate_default;						// speed of tracking (mm/s)			TODO: make this modifiable (and change units to mm)
 float feedrateBoost = 1;								// feedrate boost factor (i.e. 1.0 = no boost, 2.0 = double speed, etc.)

@@ -17,7 +17,7 @@
 bool checkEndstops();
 
 // Path advancement and execution functions
-void handleChickenHead();
-void handleCutting(long deltaTime);
+void handleChickenHead(RouterPose pose);
+void handleCutting(RouterPose pose, long deltaTime, float distanceTraveled, bool valid_sensors);
 
 #endif

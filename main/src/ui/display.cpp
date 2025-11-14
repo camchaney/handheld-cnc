@@ -377,7 +377,7 @@ void drawFixedUI() {
 	}
 }
 
-void drawUI(Position desPosition, float progress, uint8_t i) {
+void drawUI(Position desPosition, float progress, uint8_t i, float distanceTraveled) {
 	float padding = 6;
 	float windowSize = rectangleWidth - 2*padding;
 	int progressRadius = (screen->width()/2) - 10;
@@ -433,12 +433,12 @@ void drawUI(Position desPosition, float progress, uint8_t i) {
 	}
 }
 
-void updateUI(Position desPosition, float progress) {
+void updateUI(Position desPosition, float progress, float distanceTraveled) {
 	if ((millis()-lastDraw) > 15) {
 		iter = (iter + 1)%5;
 		// unsigned long now = micros();
 		// motorPosX = stepperX.currentPosition()*1.0f/ConvLead;
-		drawUI(desPosition, progress, iter);
+		drawUI(desPosition, progress, iter, distanceTraveled);
 		// Serial.printf("draw %d took %i us\n", iter, micros()-now);
 		lastDraw = millis();
 	}
