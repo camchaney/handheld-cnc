@@ -13,6 +13,11 @@ HandleButtons handleButtons(BUTT_HANDLE_L, BUTT_HANDLE_R);
 Arduino_DataBus *bus = new Arduino_HWSPI(TFT_DC, TFT_CS, &SPI1);
 Arduino_GFX *screen = new Arduino_GC9A01(bus, TFT_RST, 0, true);
 SdFat sd;
+#if FEATURE_USB == 1
+USBHost usbHost;
+USBDrive usbDrive(usbHost);
+USBFilesystem firstPartition(usbDrive);
+#endif
 
 // State variables
 State state = POWER_ON;
@@ -22,10 +27,12 @@ bool valid_sensors = true;
 DesignType designType = PRESET;
 
 // Path data
-Path path;
+DMAMEM Point points[MAX_POINTS];
+Path path = { points, MAX_POINTS, 0.0f };
 int current_point_idx = 0;
 
 // SD Stuff
+FsVolume* currentVolume = nullptr;
 FsFile logFile;
 FsFile root;
 FsFile currentDir;

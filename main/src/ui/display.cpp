@@ -261,7 +261,7 @@ void updateFileList() {
 	}
 
 	if (!currentDir) {
-		currentDir = sd.open("/");
+		currentDir = currentVolume->open("/");
 		if (!currentDir) {
 			Serial.println("Failed to open root directory!");
 			return;

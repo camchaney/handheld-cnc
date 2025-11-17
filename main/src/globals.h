@@ -11,6 +11,9 @@
 #include "ui/HandleButtons.h"
 #include "config.h"
 #include "types.h"
+#if FEATURE_USB == 1
+#include <USBHost_t36.h>
+#endif
 
 // Global object declarations
 extern AccelStepper stepperR;
@@ -24,6 +27,11 @@ extern EncoderButton encoder;
 extern HandleButtons handleButtons;
 extern Arduino_GFX *screen;
 extern SdFat sd;
+#if FEATURE_USB == 1
+extern USBHost usbHost;
+extern USBDrive usbDrive;
+extern USBFilesystem firstPartition;
+#endif
 
 // State variables
 extern State state;
@@ -38,6 +46,7 @@ extern Path path;
 extern int current_point_idx;
 
 // SD stuff
+extern FsVolume* currentVolume;
 extern FsFile logFile;
 extern FsFile root;
 extern FsFile currentDir;

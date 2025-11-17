@@ -3,6 +3,9 @@
 
 #include <Arduino.h>
 
+// features
+#define FEATURE_USB			0	// Enables the USB storage support
+
 // Pin definitions
 #define SS0   				30
 #define SS1					10
